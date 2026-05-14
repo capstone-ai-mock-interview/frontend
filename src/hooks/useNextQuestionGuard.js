@@ -20,7 +20,7 @@ import { useCallback, useRef } from "react";
  */
 export default function useNextQuestionGuard({ cooldownMs = 2000, now = () => Date.now() } = {}) {
   const inFlightRef = useRef(false);
-  const lastAtRef = useRef(0);
+  const lastAtRef = useRef(-Infinity);
 
   const tryAcquire = useCallback(() => {
     if (inFlightRef.current) return false;
