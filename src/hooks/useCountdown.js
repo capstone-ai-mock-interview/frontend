@@ -9,9 +9,10 @@ export function toClock(totalSeconds) {
   return `${mins}:${secs}`;
 }
 
-// 250ms 간격으로 폴링. 매초 미만의 잔여 시간 변화도 다음 초 경계에서 정확히 반영된다.
-// (브라우저 setInterval throttling 으로 1초 간격에서 발생하던 누적 오차를 줄여준다.)
-const TICK_INTERVAL_MS = 250;
+// 1초 간격으로 폴링. secondsLeft 가 정수(Math.ceil) 기반이라 250ms 폴링은
+// 불필요한 이펙트 실행만 늘리고 실질적 정확도 향상이 없다.
+// 절대 시각 기반이므로 탭 백그라운드 복귀 시에도 다음 tick 에서 즉시 보정된다.
+const TICK_INTERVAL_MS = 1000;
 
 function normalizeDeadline(value) {
   if (value == null) return null;
