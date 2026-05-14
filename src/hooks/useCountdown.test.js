@@ -172,7 +172,8 @@ describe("useCountdown — 절대 시각 기반 동작", () => {
     );
 
     expect(result.current.secondsLeft).toBe(0);
-    expect(result.current.formatted).toBe("00:00");
+    // null 이면 "--:--" 로 표시 (질문 대기 중 상태를 00:00 으로 오해하지 않도록)
+    expect(result.current.formatted).toBe("--:--");
 
     act(() => advance(10_000));
     expect(onFinish).not.toHaveBeenCalled();

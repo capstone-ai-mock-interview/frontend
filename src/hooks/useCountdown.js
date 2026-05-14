@@ -88,7 +88,10 @@ export default function useCountdown({ expiresAt, isActive, onFinish } = {}) {
     }
   }, [deadline, secondsLeft]);
 
-  const formatted = useMemo(() => toClock(secondsLeft), [secondsLeft]);
+  const formatted = useMemo(
+    () => (deadline == null ? "--:--" : toClock(secondsLeft)),
+    [deadline, secondsLeft]
+  );
 
   return { secondsLeft, formatted };
 }

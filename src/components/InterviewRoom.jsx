@@ -32,8 +32,12 @@ export default function InterviewRoom({
   // 절대 시각(ms) 기반 타이머 deadline.
   // - interviewExpiresAt: 면접 시작 시점에 한 번 고정.
   // - answerExpiresAt: 매 턴마다 갱신 (첫 턴 시작 / /next 응답 / Agent QUESTION 수신).
+  //   Mock 모드는 컴포넌트 마운트 즉시 첫 질문이 표시되므로 초기값을 바로 설정한다.
+  //   실제 모드는 Agent 의 QUESTION DataMessage 수신 시 설정된다.
   const [interviewExpiresAt] = useState(() => Date.now() + totalDurationSeconds * 1000);
-  const [answerExpiresAt, setAnswerExpiresAt] = useState(null);
+  const [answerExpiresAt, setAnswerExpiresAt] = useState(
+    () => session.livekit?.isMock ? Date.now() + answerTimeLimitSeconds * 1000 : null
+  );
 
   // 동기 가드 (in-flight + cooldown).
   const nextGuard = useNextQuestionGuard({ cooldownMs: NEXT_COOLDOWN_MS });
@@ -118,8 +122,7 @@ export default function InterviewRoom({
       setIsConnected(true);
       setWaitingForAgent(false);
       setCurrentQuestion("최근 프로젝트에서 가장 어려웠던 기술 의사결정 사례를 설명해주세요.");
-      // Mock 모드: 첫 턴 답변 deadline 을 즉시 설정
-      setAnswerExpiresAt(Date.now() + answerTimeLimitSeconds * 1000);
+      // answerExpiresAt 은 useState 초기값에서 이미 설정됨.
       return undefined;
     }
 
@@ -338,9 +341,9 @@ export default function InterviewRoom({
             <span>전체 남은 시간</span>
             <strong>{interviewTimer.formatted}</strong>
           </div>
-          <div className={`timer-box ${answerTimer.secondsLeft <= 15 ? "danger" : ""}`}>
+          <div className={`timer-box ${answerExpiresAt != null && answerTimer.secondsLeft <= 15 ? "danger" : ""}`}>
             <span>답변 남은 시간 ({Math.floor(answerTimeLimitSeconds / 60)}:{String(answerTimeLimitSeconds % 60).padStart(2, "0")})</span>
-            <strong>{answerTimer.formatted}</strong>
+            <strong>{answerExpiresAt == null ? "대기 중" : answerTimer.formatted}</strong>
           </div>
         </div>
 
