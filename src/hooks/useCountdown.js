@@ -69,18 +69,20 @@ export default function useCountdown({ expiresAt, isActive, onFinish } = {}) {
   }, [isActive, deadline]);
 
   // 0 으로 처음 진입할 때만 onFinish 발화.
+  // - secondsLeft 는 직전 렌더 값이라 deadline 이 막 바뀐 직후에는 stale 일 수 있다.
+  //   그래서 deadline 기준으로 fresh 잔여 시간을 다시 계산해 판단한다.
   // - deadline 이 null 이면(아직 미설정) 발화하지 않는다.
-  // - secondsLeft 가 양수로 복귀하면 게이트 재무장.
   useEffect(() => {
     if (deadline == null) {
       firedRef.current = false;
       return;
     }
-    if (secondsLeft > 0) {
+    const remaining = computeSecondsLeft(deadline);
+    if (remaining > 0) {
       firedRef.current = false;
       return;
     }
-    if (secondsLeft === 0 && !firedRef.current) {
+    if (!firedRef.current) {
       firedRef.current = true;
       onFinishRef.current?.();
     }
