@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Room, RoomEvent } from "livekit-client";
 import useCountdown from "../hooks/useCountdown";
+import useNextQuestionGuard from "../hooks/useNextQuestionGuard";
 import { nextQuestion } from "../api/interviewApi";
 
 const WARNING_THRESHOLD = 10;
@@ -34,9 +35,8 @@ export default function InterviewRoom({
   const [interviewExpiresAt] = useState(() => Date.now() + totalDurationSeconds * 1000);
   const [answerExpiresAt, setAnswerExpiresAt] = useState(null);
 
-  // 동기 가드.
-  const inFlightRef = useRef(false);
-  const lastNextAtRef = useRef(0);
+  // 동기 가드 (in-flight + cooldown).
+  const nextGuard = useNextQuestionGuard({ cooldownMs: NEXT_COOLDOWN_MS });
   // 턴 SSOT 검증을 위해 ref 도 유지 (closure 안에서 최신 값 즉시 참조).
   const turnRef = useRef(1);
 
@@ -46,8 +46,9 @@ export default function InterviewRoom({
   }, []);
 
   // 답변 타이머 만료 시 자동으로 /next 호출.
+  // in-flight 차단은 nextGuard.tryAcquire 가 담당하므로 여기서는 ending 만 검사.
   const handleAnswerTimerExpire = useCallback(async () => {
-    if (ending || inFlightRef.current) return;
+    if (ending) return;
     addLog("SYSTEM", `Q${turnRef.current} 답변 시간이 종료되었습니다. 다음 질문을 요청합니다.`);
     await requestNextQuestion();
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -244,7 +245,7 @@ export default function InterviewRoom({
       setAnswerExpiresAt(Date.now() + answerTimeLimitSeconds * 1000);
     } finally {
       setNextLoading(false);
-      inFlightRef.current = false;
+      nextGuard.release();
     }
   };
 
