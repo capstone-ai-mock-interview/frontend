@@ -335,6 +335,14 @@ export default function App() {
     const intervalId = window.setInterval(async () => {
       try {
         const response = await getInterviewResult(session.sessionId);
+        if (disposed) return;
+        if (response?.failed) {
+          setPolling(false);
+          setSession(null);
+          setError(response.message || "AI 면접관 연결 문제로 면접이 중단되었습니다. 새 면접을 시작해주세요.");
+          navigate(ROUTE.SETUP);
+          return;
+        }
         if (disposed || response?.pending || !response?.data) return;
         setResult(response.data);
         try {
