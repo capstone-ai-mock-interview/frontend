@@ -135,6 +135,14 @@ export function getInterviewResult(sessionId) {
   }).then((payload) => {
     // 아직 평가 중인 경우 (백엔드가 success: false를 반환)
     if (payload.success === false) {
+      if (payload.status === "FAILED") {
+        return {
+          success: false,
+          failed: true,
+          message: payload.totalFeedback || "AI 면접관 연결 문제로 면접이 중단되었습니다. 새 면접을 시작해주세요.",
+        };
+      }
+
       return {
         success: true,
         pending: true,

@@ -285,7 +285,7 @@ export default function InterviewRoom({
   const isHost = session.role === "HOST";
 
   const requestNextQuestion = async () => {
-    if (!currentQuestion || !isMyActiveTurn || !canAskNextQuestion || ending) return;
+    if (connectionError || !currentQuestion || !isMyActiveTurn || !canAskNextQuestion || ending) return;
     if (!nextGuard.tryAcquire()) return;
     setNextLoading(true);
     await setLocalMicPublish(false);
@@ -323,6 +323,7 @@ export default function InterviewRoom({
     } catch (err) {
       addLog("SYSTEM", `다음 질문 요청 실패: ${err.message}`);
       // 실패 시에는 답변을 계속 받을 수 있도록 타이머 복구
+      setConnectionError(err.message || "AI 면접관 연결 문제로 다음 질문을 받을 수 없습니다. 새 면접을 시작해주세요.");
       setAnswerExpiresAt(Date.now() + answerTimeLimitSeconds * 1000);
     } finally {
       setNextLoading(false);
@@ -345,6 +346,12 @@ export default function InterviewRoom({
     const poll = async () => {
       try {
         const response = await getInterviewResult(session.sessionId);
+        if (disposed) return;
+        if (response?.failed) {
+          roomRef.current?.disconnect();
+          setConnectionError(response.message || "AI 면접관 연결 문제로 면접이 중단되었습니다. 새 면접을 시작해주세요.");
+          return;
+        }
         if (disposed || response?.pending || !response?.data) return;
         roomRef.current?.disconnect();
         onGuestFeedbackReady(response.data);
@@ -466,7 +473,7 @@ export default function InterviewRoom({
       showAnswerTimer={answerExpiresAt != null}
 
       warningVisible={warningVisible}
-      errorMessage=""
+      errorMessage={connectionError}
 
       isMicOn={isMicOn}
       isMicToggleDisabled={Boolean(
@@ -480,7 +487,8 @@ export default function InterviewRoom({
       canAskNext={
         Boolean(currentQuestion) &&
         isMyActiveTurn &&
-        canAskNextQuestion
+        canAskNextQuestion &&
+        !connectionError
       }
       targetIdentity={targetIdentity}
       myIdentity={myIdentity}
