@@ -55,24 +55,24 @@ export default function HomeView({ user, onStartInterview, onLogin, onOpenHistor
       </div>
 
       <div className="feature-grid">
-        <div className="feature-card mint">
+        <div className="feature-item mint" tabIndex={0}>
           <div className="feature-icon">🎙️</div>
           <h3>실시간 음성 면접</h3>
-          <p>
+          <p className="feature-description">
             LiveKit 기반 실시간 음성 연결로 실제 면접과 동일한 환경을 경험합니다.
           </p>
         </div>
-        <div className="feature-card purple">
+        <div className="feature-item purple" tabIndex={0}>
           <div className="feature-icon">🤖</div>
           <h3>RAG 기반 질문 생성</h3>
-          <p>
+          <p className="feature-description">
             이력서와 자소서를 분석해 직무에 꼭 맞는 맞춤 질문과 꼬리 질문을 생성합니다.
           </p>
         </div>
-        <div className="feature-card pink">
+        <div className="feature-item pink" tabIndex={0}>
           <div className="feature-icon">📊</div>
           <h3>AI 피드백 리포트</h3>
-          <p>
+          <p className="feature-description">
             면접 종료 후 기술 정확성·논리성·전달력 지표와 모범 답안을 자동으로 제공합니다.
           </p>
         </div>
