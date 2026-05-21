@@ -1514,7 +1514,7 @@ input:focus, select:focus {
   width: min(1080px, 92vw);
   height: min(720px, 72vh);
   border-radius: 999px;
-  background: radial-gradient(ellipse, rgba(250, 204, 21, .42), rgba(250, 204, 21, 0) 72%);
+  background: radial-gradient(ellipse, rgba(250, 204, 21, .32), rgba(250, 204, 21, 0) 72%);
   filter: blur(58px);
   transform: translate(-50%, -50%);
   pointer-events: none;
