@@ -227,25 +227,25 @@ export default function SessionSetupForm({ onSubmit, isSubmitting }) {
         key: "mode",
         status: step > 1 ? "done" : step === 1 ? "active" : "pending",
         label: "유형",
-        value: step >= 1 ? (isGroup ? `그룹 면접 (${maxParticipants}명)` : "일반 면접") : "",
+        value: step > 1 ? (isGroup ? `그룹 면접 (${maxParticipants}명)` : "일반 면접") : "",
       },
       {
         key: "job",
         status: step > 2 ? "done" : step === 2 ? "active" : "pending",
         label: "직무",
-        value: step >= 2 ? selectedJob?.label ?? jobField : "",
+        value: step > 2 ? selectedJob?.label ?? jobField : "",
       },
       {
         key: "resume",
         status: step > 2 ? "done" : step === 2 ? "active" : "pending",
         label: "이력서",
-        value: step >= 2 ? selectedResume ? selectedResume.title : "미선택" : "",
+        value: step > 2 ? selectedResume ? selectedResume.title : "미선택" : "",
       },
       {
         key: "time",
         status: step > 3 ? "done" : step === 3 ? "active" : "pending",
         label: "시간",
-        value: step >= 3 ? `${durationMinutes}분` : "",
+        value: step > 3 ? `${durationMinutes}분` : "",
       },
     ],
     [durationMinutes, isGroup, jobField, maxParticipants, selectedJob, selectedResume, step]
@@ -411,7 +411,7 @@ export default function SessionSetupForm({ onSubmit, isSubmitting }) {
 
       <div className="setup-info-line">
         <Clock3 size={16} />
-        질문마다 답변 시간을 의식하면서 실제 면접처럼 연습할 수 있어요.
+        질문마다 답변 시간 1분 30초를 기준으로 실제 면접처럼 연습할 수 있어요.
       </div>
     </motion.div>
   );
@@ -561,11 +561,6 @@ export default function SessionSetupForm({ onSubmit, isSubmitting }) {
                 {item.value && <strong>{item.value}</strong>}
               </div>
             ))}
-          </div>
-
-          <div className="setup-rule-panel">
-            <strong>답변 룰</strong>
-            <p>질문별 최대 1분 30초 안에 핵심부터 답변하는 흐름으로 진행됩니다.</p>
           </div>
         </motion.aside>
       </section>

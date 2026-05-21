@@ -1268,11 +1268,11 @@ input:focus, select:focus {
   position: absolute;
   left: 50%;
   top: 45%;
-  width: min(760px, 72vw);
-  height: min(520px, 58vh);
+  width: min(1080px, 92vw);
+  height: min(720px, 72vh);
   border-radius: 999px;
-  background: radial-gradient(ellipse, rgba(250, 204, 21, .36), rgba(250, 204, 21, 0) 68%);
-  filter: blur(42px);
+  background: radial-gradient(ellipse, rgba(250, 204, 21, .18), rgba(250, 204, 21, 0) 72%);
+  filter: blur(58px);
   transform: translate(-50%, -50%);
   pointer-events: none;
   z-index: -1;
@@ -1282,7 +1282,7 @@ input:focus, select:focus {
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
+  grid-template-columns: minmax(0, 1fr) 260px;
   gap: 18px;
   align-items: stretch;
 }
@@ -1310,7 +1310,7 @@ input:focus, select:focus {
 
 .setup-summary-card {
   --summary-label-size: 15px;
-  --summary-value-size: 18px;
+  --summary-value-size: 20px;
   --summary-item-min-height: 86px;
   display: grid;
   gap: 10px;
@@ -1419,7 +1419,6 @@ input:focus, select:focus {
 
 .setup-soft-panel,
 .setup-mic-panel,
-.setup-rule-panel,
 .setup-empty-state {
   border-radius: 8px;
   background: rgba(248, 250, 252, .78);
@@ -1522,6 +1521,7 @@ input:focus, select:focus {
   display: flex;
   align-items: center;
   gap: 8px;
+  margin-top: auto;
   border-radius: 8px;
   padding: 12px 14px;
   background: rgba(255, 251, 235, .78);
@@ -1606,7 +1606,9 @@ input:focus, select:focus {
   align-content: start;
 }
 .setup-summary-item {
-  align-items: flex-start;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  align-items: stretch;
   border-radius: 8px;
   padding: 14px 12px;
   background: rgba(248, 250, 252, .72);
@@ -1617,48 +1619,27 @@ input:focus, select:focus {
   color: var(--slate-500);
   font-size: var(--summary-label-size);
   font-weight: 800;
+  justify-self: start;
 }
 .setup-summary-item strong {
-  max-width: 190px;
+  max-width: 100%;
   color: var(--slate-900);
   font-size: var(--summary-value-size);
   line-height: 1.25;
   text-align: right;
+  align-self: end;
+  justify-self: end;
   overflow-wrap: anywhere;
 }
 .setup-summary-item.is-active {
-  background: rgba(255, 255, 255, .9);
+  background: rgba(239, 246, 255, .9);
   border-color: rgba(96, 165, 250, .75);
   box-shadow: inset 0 0 0 1px rgba(96, 165, 250, .18);
 }
-.setup-summary-item.is-active span,
-.setup-summary-item.is-active strong {
-  color: var(--blue-700);
-}
 .setup-summary-item.is-done {
-  background: var(--slate-900);
-  border-color: var(--slate-900);
-}
-.setup-summary-item.is-done span,
-.setup-summary-item.is-done strong {
-  color: white;
-}
-.setup-rule-panel {
-  display: grid;
-  gap: 4px;
-  padding: 10px 12px;
-  margin-top: auto;
-  background: rgba(236, 253, 245, .78);
-  border-color: rgba(134, 239, 172, .8);
-}
-.setup-rule-panel strong {
-  color: #047857;
-  font-size: 13px;
-}
-.setup-rule-panel p {
-  color: var(--slate-600);
-  font-size: 12px;
-  line-height: 1.45;
+  background: rgba(239, 246, 255, .9);
+  border-color: rgba(96, 165, 250, .75);
+  box-shadow: inset 0 0 0 1px rgba(96, 165, 250, .18);
 }
 
 @keyframes setupMicPulse {
