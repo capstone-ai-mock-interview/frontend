@@ -391,74 +391,96 @@ export default function InterviewRoomView({
         transition={{ duration: 0.4, ease: "easeOut", delay: 0.3 }}
         className="absolute bottom-10 left-10 right-[380px] z-20"
       >
-        <div className="flex items-center justify-center gap-10 px-6 py-4 bg-white/20 backdrop-blur-3xl backdrop-saturate-200 border-[3px] border-white/90 rounded-2xl shadow-2xl shadow-blue-900/20" style={{ outline: '1.5px solid rgba(255,255,255,0.6)', outlineOffset: '-6px' }}>
-          {/* End Interview */}
-          <Button
-            variant="ghost"
-            onClick={onEndInterview}
-            disabled={ending}
-            className="rounded-xl px-8 h-14 text-rose-500 hover:bg-rose-50 hover:text-rose-600 gap-2 font-medium"
-          >
-            {ending ? (
-              <>
-                <span className="w-4 h-4 border-2 border-rose-300 border-t-rose-500 rounded-full animate-spin" />
-                <span className="text-sm">종료 중</span>
-              </>
-            ) : (
-              <>
-                <Square className="size-4 fill-current" />
-                <span className="text-sm">
-                  {isGroup && !isHost ? "나가기" : "면접 종료"}
-                </span>
-              </>
-            )}
-          </Button>
-
-          {/* Mic Toggle */}
-          <div className="relative">
-            {isMicOn && (
-              <>
-                <motion.div
-                  animate={{ scale: [1, 1.6], opacity: [0, 0.45, 0] }}
-                  transition={{
-                    duration: 1.8,
-                    repeat: Infinity,
-                    ease: "easeOut",
-                    times: [0, 0.3, 1],
-                  }}
-                  className="absolute inset-0 rounded-full bg-blue-400 pointer-events-none"
-                />
-                <motion.div
-                  animate={{ scale: [1, 1.6], opacity: [0, 0.45, 0] }}
-                  transition={{
-                    duration: 1.8,
-                    repeat: Infinity,
-                    ease: "easeOut",
-                    times: [0, 0.3, 1],
-                    delay: 0.9,
-                  }}
-                  className="absolute inset-0 rounded-full bg-blue-400 pointer-events-none"
-                />
-              </>
-            )}
+        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-6 px-6 py-4 bg-white/20 backdrop-blur-3xl backdrop-saturate-200 border-[3px] border-white/90 rounded-2xl shadow-2xl shadow-blue-900/20" style={{ outline: '1.5px solid rgba(255,255,255,0.6)', outlineOffset: '-6px' }}>
+          <div className="col-start-2 flex items-center justify-center gap-10">
+            {/* End Interview */}
             <Button
-              variant={isMicOn ? "default" : "secondary"}
-              size="icon"
-              onClick={onToggleMic}
-              disabled={isMicToggleDisabled || ending}
-              className={cn(
-                "rounded-full size-14 relative z-10 transition-all",
-                isMicOn
-                  ? "bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/30"
-                  : "bg-slate-100 hover:bg-slate-200 text-slate-600"
-              )}
+              variant="ghost"
+              onClick={onEndInterview}
+              disabled={ending}
+              className="rounded-xl px-8 h-14 text-rose-500 hover:bg-rose-50 hover:text-rose-600 gap-2 font-medium"
             >
-              {isMicOn ? <Mic className="size-6" /> : <MicOff className="size-6" />}
+              {ending ? (
+                <>
+                  <span className="w-4 h-4 border-2 border-rose-300 border-t-rose-500 rounded-full animate-spin" />
+                  <span className="text-sm">종료 중</span>
+                </>
+              ) : (
+                <>
+                  <Square className="size-4 fill-current" />
+                  <span className="text-sm">
+                    {isGroup && !isHost ? "나가기" : "면접 종료"}
+                  </span>
+                </>
+              )}
+            </Button>
+
+            {/* Mic Toggle */}
+            <div className="relative">
+              {isMicOn && (
+                <>
+                  <motion.div
+                    animate={{ scale: [1, 1.6], opacity: [0, 0.45, 0] }}
+                    transition={{
+                      duration: 1.8,
+                      repeat: Infinity,
+                      ease: "easeOut",
+                      times: [0, 0.3, 1],
+                    }}
+                    className="absolute inset-0 rounded-full bg-blue-400 pointer-events-none"
+                  />
+                  <motion.div
+                    animate={{ scale: [1, 1.6], opacity: [0, 0.45, 0] }}
+                    transition={{
+                      duration: 1.8,
+                      repeat: Infinity,
+                      ease: "easeOut",
+                      times: [0, 0.3, 1],
+                      delay: 0.9,
+                    }}
+                    className="absolute inset-0 rounded-full bg-blue-400 pointer-events-none"
+                  />
+                </>
+              )}
+              <Button
+                variant={isMicOn ? "default" : "secondary"}
+                size="icon"
+                onClick={onToggleMic}
+                disabled={isMicToggleDisabled || ending}
+                className={cn(
+                  "rounded-full size-14 relative z-10 transition-all",
+                  isMicOn
+                    ? "bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/30"
+                    : "bg-slate-100 hover:bg-slate-200 text-slate-600"
+                )}
+              >
+                {isMicOn ? <Mic className="size-6" /> : <MicOff className="size-6" />}
+              </Button>
+            </div>
+
+            {/* Next Question */}
+            <Button
+              variant="ghost"
+              onClick={onNextQuestion}
+              disabled={!canAskNext || nextLoading || ending}
+              className="rounded-xl px-8 h-14 text-slate-700 hover:bg-slate-100 gap-2 font-medium"
+            >
+              {nextLoading ? (
+                <>
+                  <span className="w-4 h-4 border-2 border-slate-300 border-t-blue-600 rounded-full animate-spin" />
+                  <span className="text-sm">요청 중</span>
+                </>
+              ) : (
+                <>
+                  <span className="text-sm">다음 질문</span>
+                  <ChevronRight className="size-4" />
+                </>
+              )}
             </Button>
           </div>
 
           {/* Audio Level Visualizer */}
-          <div className="flex items-center gap-[3px] h-10">
+          <div className="col-start-3 justify-self-end flex items-center gap-[3px] h-10">
             {Array.from({ length: 12 }).map((_, i) => {
               const barThreshold = (i + 1) / 12;
               const isActive = isMicOn && audioLevel >= barThreshold * 0.8;
@@ -479,67 +501,6 @@ export default function InterviewRoomView({
               );
             })}
           </div>
-
-          {/* Next Question */}
-          <Button
-            variant="ghost"
-            onClick={onNextQuestion}
-            disabled={!canAskNext || nextLoading || ending}
-            className="rounded-xl px-8 h-14 text-slate-700 hover:bg-slate-100 gap-2 font-medium"
-          >
-            {nextLoading ? (
-              <>
-                <span className="w-4 h-4 border-2 border-slate-300 border-t-blue-600 rounded-full animate-spin" />
-                <span className="text-sm">요청 중</span>
-              </>
-            ) : (
-              <>
-                <span className="text-sm">다음 질문</span>
-                <ChevronRight className="size-4" />
-              </>
-            )}
-          </Button>
-
-          {/* Audio Level Visualizer */}
-          <div className="flex items-center gap-[3px] h-10">
-            {Array.from({ length: 12 }).map((_, i) => {
-              const barThreshold = (i + 1) / 12;
-              const isActive = isMicOn && audioLevel >= barThreshold * 0.8;
-              const barColor = i < 8 ? "bg-blue-500" : i < 10 ? "bg-amber-400" : "bg-rose-400";
-              return (
-                <motion.div
-                  key={i}
-                  animate={{
-                    scaleY: isActive ? 0.4 + (audioLevel * 0.6) : 0.15,
-                    opacity: isActive ? 1 : 0.3,
-                  }}
-                  transition={{ duration: 0.05, ease: "linear" }}
-                  className={cn(
-                    "w-[4px] h-full rounded-full origin-bottom",
-                    isActive ? barColor : "bg-slate-300"
-                  )}
-                />
-              );
-            })}
-          </div>
-          <Button
-            variant="ghost"
-            onClick={onNextQuestion}
-            disabled={!canAskNext || nextLoading || ending}
-            className="rounded-xl px-8 h-14 text-slate-700 hover:bg-slate-100 gap-2 font-medium"
-          >
-            {nextLoading ? (
-              <>
-                <span className="w-4 h-4 border-2 border-slate-300 border-t-blue-600 rounded-full animate-spin" />
-                <span className="text-sm">요청 중</span>
-              </>
-            ) : (
-              <>
-                <span className="text-sm">다음 질문</span>
-                <ChevronRight className="size-4" />
-              </>
-            )}
-          </Button>
         </div>
       </motion.div>
     </div>
