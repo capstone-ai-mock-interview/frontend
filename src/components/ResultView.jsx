@@ -3,7 +3,6 @@ import CompetencyRadarChart from "./CompetencyRadarChart.jsx";
 export default function ResultView({ result, onRestart, onOpenHistory }) {
   // 백엔드 FeedbackResponse 구조: totalFeedback, overallScore(상/중/하), competencyChart(JSON), qaPairs[]
   const overallScore = result.overallScore || "N/A";
-  const level = overallScore === "상" ? "우수" : overallScore === "중" ? "보통" : "보완 필요";
 
   // competencyChart 파싱: {"유형명": 점수, ...}
   let chartData = {};
@@ -16,7 +15,7 @@ export default function ResultView({ result, onRestart, onOpenHistory }) {
   }
 
   return (
-    <section className="card history-card result-feedback-card">
+    <section className="card history-card feedback-detail-card">
       <div className="header-row">
         <div>
           <p className="eyebrow">Interview Result</p>
@@ -35,8 +34,7 @@ export default function ResultView({ result, onRestart, onOpenHistory }) {
       <section className="panel">
         <h3>종합 평가</h3>
         <div className="score-chip">종합 평가: {overallScore}</div>
-        <p className="subtext compact">현재 레벨: {level}</p>
-        <p className="subtext result-summary-text" style={{ whiteSpace: "pre-wrap" }}>
+        <p className="subtext feedback-summary-text" style={{ whiteSpace: "pre-wrap" }}>
           {result.totalFeedback}
         </p>
       </section>

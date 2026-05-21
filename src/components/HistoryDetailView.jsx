@@ -19,7 +19,7 @@ export default function HistoryDetailView({ loading, record, onBack }) {
   }
 
   return (
-    <section className="card history-card">
+    <section className="card history-card feedback-detail-card">
       <div className="header-row">
         <div>
           <p className="eyebrow">Interview Detail</p>
@@ -38,7 +38,7 @@ export default function HistoryDetailView({ loading, record, onBack }) {
           <section className="panel">
             <h3>종합 평가</h3>
             <div className="score-chip">종합 평가: {record.overallScore || "-"}</div>
-            <p className="subtext" style={{ whiteSpace: "pre-wrap" }}>
+            <p className="subtext feedback-summary-text" style={{ whiteSpace: "pre-wrap" }}>
               {record.totalFeedback}
             </p>
           </section>
