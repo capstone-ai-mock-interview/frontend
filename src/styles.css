@@ -719,6 +719,24 @@ input:focus, select:focus {
   pointer-events: none;
   transform: translateX(-50%);
 }
+.home-card::after {
+  content: "";
+  position: absolute;
+  top: 18px;
+  bottom: -92px;
+  left: 50%;
+  width: 100vw;
+  z-index: -1;
+  background:
+    radial-gradient(circle at 22% 30%, rgba(255, 255, 255, .42), rgba(255, 255, 255, 0) 13%),
+    radial-gradient(circle at 68% 18%, rgba(255, 255, 255, .28), rgba(255, 255, 255, 0) 10%),
+    radial-gradient(circle at 78% 68%, rgba(219, 234, 254, .34), rgba(219, 234, 254, 0) 15%);
+  filter: blur(18px);
+  opacity: .52;
+  pointer-events: none;
+  transform: translate3d(-50%, 0, 0);
+  animation: home-light-drift 28s ease-in-out infinite alternate;
+}
 .home-hero {
   text-align: center;
   padding: 56px 24px 52px;
@@ -974,6 +992,10 @@ input:focus, select:focus {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .home-card::after {
+    animation: none;
+  }
+
   .fortune-wrap::after {
     animation: none;
     opacity: 0;
@@ -1205,6 +1227,18 @@ input:focus, select:focus {
    Keyframes
 ═══════════════════════════════════════════════════ */
 @keyframes spin { to { transform: rotate(360deg); } }
+
+@keyframes home-light-drift {
+  0% {
+    transform: translate3d(calc(-50% - 18px), 8px, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(calc(-50% + 18px), -12px, 0) scale(1.03);
+  }
+  100% {
+    transform: translate3d(calc(-50% + 34px), 14px, 0) scale(1.01);
+  }
+}
 
 @keyframes fortune-glass-shine {
   0%, 42% {
