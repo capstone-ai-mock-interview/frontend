@@ -28,7 +28,7 @@ export default function ResultView({ result, onRestart, onOpenHistory }) {
       </section>
 
       <section className="card">
-        <CompetencyRadarChart chartData={chartData} />
+        <CompetencyRadarChart chartData={chartData} strengthTypes={result.strengthTypes} weaknessTypes={result.weaknessTypes} />
       </section>
 
       <section className="card">
