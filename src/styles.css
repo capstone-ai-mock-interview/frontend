@@ -695,11 +695,7 @@ input:focus, select:focus {
   display: grid;
   gap: 0;
   width: 100%;
-  overflow-x: clip;
-  background:
-    radial-gradient(circle at 18% 12%, rgba(255, 255, 255, .72), rgba(255, 255, 255, 0) 34%),
-    radial-gradient(circle at 82% 46%, rgba(219, 234, 254, .66), rgba(219, 234, 254, 0) 38%),
-    linear-gradient(145deg, rgba(255, 255, 255, .28), rgba(255, 255, 255, 0) 62%);
+  background: transparent;
   border: none;
   padding: 0;
   box-shadow: none;
@@ -707,16 +703,21 @@ input:focus, select:focus {
 .home-card::before {
   content: "";
   position: absolute;
-  inset: 90px -18px 180px;
+  top: -32px;
+  bottom: -64px;
+  left: 50%;
+  width: 100vw;
   z-index: -1;
-  background: rgba(255, 255, 255, .26);
-  border: 1px solid rgba(255, 255, 255, .5);
-  border-radius: 28px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .72), 0 28px 80px rgba(37, 99, 235, .08);
+  background:
+    radial-gradient(circle at 18% 10%, rgba(255, 255, 255, .74), rgba(255, 255, 255, 0) 34%),
+    radial-gradient(circle at 84% 42%, rgba(219, 234, 254, .68), rgba(219, 234, 254, 0) 40%),
+    linear-gradient(145deg, rgba(255, 255, 255, .32), rgba(255, 255, 255, 0) 64%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .7);
   backdrop-filter: blur(20px) saturate(140%);
-  mask-image: linear-gradient(180deg, transparent, #000 14%, #000 82%, transparent);
-  opacity: .78;
+  mask-image: linear-gradient(180deg, transparent, #000 10%, #000 86%, transparent);
+  opacity: .86;
   pointer-events: none;
+  transform: translateX(-50%);
 }
 .home-hero {
   text-align: center;
