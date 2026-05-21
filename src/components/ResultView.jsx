@@ -16,34 +16,39 @@ export default function ResultView({ result, onRestart, onOpenHistory }) {
   }
 
   return (
-    <div className="result-layout">
-      <section className="card">
-        <p className="eyebrow">Interview Result</p>
-        <h2>종합 피드백</h2>
+    <section className="card history-card">
+      <div className="header-row">
+        <div>
+          <p className="eyebrow">Interview Result</p>
+          <h2>종합 피드백</h2>
+        </div>
+        <div className="inline-actions">
+          <button className="ghost-btn" type="button" onClick={onOpenHistory}>
+            면접 기록 보기
+          </button>
+          <button className="ghost-btn" type="button" onClick={onRestart}>
+            새 면접 시작
+          </button>
+        </div>
+      </div>
+
+      <section className="panel">
+        <h3>종합 평가</h3>
         <div className="score-chip">종합 평가: {overallScore}</div>
         <p className="subtext compact">현재 레벨: {level}</p>
-        <p className="subtext" style={{ whiteSpace: "pre-wrap", marginTop: "1rem" }}>
+        <p className="subtext" style={{ whiteSpace: "pre-wrap" }}>
           {result.totalFeedback}
         </p>
       </section>
 
-      <section className="card">
-        <CompetencyRadarChart chartData={chartData} strengthTypes={result.strengthTypes} weaknessTypes={result.weaknessTypes} />
-      </section>
+      {Object.keys(chartData).length > 0 && (
+        <section className="panel">
+          <CompetencyRadarChart chartData={chartData} strengthTypes={result.strengthTypes} weaknessTypes={result.weaknessTypes} />
+        </section>
+      )}
 
-      <section className="card">
-        <div className="header-row">
-          <h3>문답 분석</h3>
-          <div className="inline-actions">
-            <button className="ghost-btn" type="button" onClick={onOpenHistory}>
-              면접 기록 보기
-            </button>
-            <button className="ghost-btn" type="button" onClick={onRestart}>
-              새 면접 시작
-            </button>
-          </div>
-        </div>
-
+      <section className="panel">
+        <h3>질문별 분석</h3>
         <div className="qa-list">
           {result.qaPairs?.map((qa) => (
             <article key={qa.sequenceNumber} className="qa-item">
@@ -62,6 +67,6 @@ export default function ResultView({ result, onRestart, onOpenHistory }) {
           ))}
         </div>
       </section>
-    </div>
+    </section>
   );
 }
