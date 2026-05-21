@@ -437,7 +437,7 @@ input:focus, select:focus {
 .audio-meter-fill {
   height: 100%;
   background: linear-gradient(90deg, var(--blue-500), #38bdf8);
-  transition: width .1s linear;
+  transition: width .045s linear;
   border-radius: var(--radius-pill);
 }
 
@@ -1285,16 +1285,16 @@ input:focus, select:focus {
   display: grid;
   grid-template-rows: auto 1fr auto;
   gap: 18px;
-  height: 720px;
+  height: 680px;
   padding: 28px;
   overflow: hidden;
 }
 
 .setup-summary-card {
   display: grid;
-  gap: 14px;
-  height: 720px;
-  padding: 22px;
+  gap: 10px;
+  height: 680px;
+  padding: 16px;
   overflow: hidden;
 }
 
@@ -1320,41 +1320,16 @@ input:focus, select:focus {
 }
 
 .setup-hero-row h1 {
-  margin-top: 4px;
-  font-size: clamp(26px, 4vw, 34px);
+  margin-top: 0;
+  font-size: clamp(24px, 3.5vw, 32px);
   font-weight: 800;
   letter-spacing: -.04em;
   color: var(--slate-900);
 }
-
-.setup-live-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  align-self: flex-start;
-  border-radius: var(--radius-pill);
-  background: rgba(239, 246, 255, .78);
-  border: 1px solid rgba(147, 197, 253, .72);
-  color: var(--blue-700);
-  padding: 8px 12px;
-  font-size: 12px;
-  font-weight: 800;
-}
-
 .setup-step-body {
   display: grid;
   gap: 16px;
   align-content: start;
-}
-
-.setup-step-title {
-  display: grid;
-  gap: 4px;
-}
-.setup-step-title h2 {
-  font-size: 24px;
-  font-weight: 800;
-  color: var(--slate-900);
 }
 
 .setup-choice-grid {
@@ -1598,57 +1573,61 @@ input:focus, select:focus {
   display: grid;
   gap: 2px;
 }
-.setup-summary-kicker {
-  color: var(--blue-600);
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: .1em;
-  font-weight: 800;
-}
 .setup-summary-head h2 {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 800;
 }
 .setup-summary-list {
   display: grid;
-  gap: 8px;
+  gap: 6px;
   overflow: auto;
-  padding-right: 4px;
+  padding-right: 2px;
+  align-content: start;
 }
 .setup-summary-item {
   align-items: flex-start;
   border-radius: 8px;
-  padding: 12px;
+  padding: 8px 10px;
   background: rgba(248, 250, 252, .72);
   border: 1px solid rgba(226, 232, 240, .9);
+  min-height: 58px;
 }
 .setup-summary-item span {
   color: var(--slate-500);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
 }
 .setup-summary-item strong {
   max-width: 160px;
   color: var(--slate-900);
-  font-size: 13px;
+  font-size: 12px;
   text-align: right;
   overflow-wrap: anywhere;
 }
+.setup-summary-item.is-done {
+  background: rgba(219, 234, 254, .9);
+  border-color: rgba(96, 165, 250, .75);
+}
+.setup-summary-item.is-done span,
+.setup-summary-item.is-done strong {
+  color: var(--blue-700);
+}
 .setup-rule-panel {
   display: grid;
-  gap: 6px;
-  padding: 14px;
+  gap: 4px;
+  padding: 10px 12px;
+  margin-top: auto;
   background: rgba(236, 253, 245, .78);
   border-color: rgba(134, 239, 172, .8);
 }
 .setup-rule-panel strong {
   color: #047857;
-  font-size: 14px;
+  font-size: 13px;
 }
 .setup-rule-panel p {
   color: var(--slate-600);
-  font-size: 13px;
-  line-height: 1.65;
+  font-size: 12px;
+  line-height: 1.45;
 }
 
 @keyframes setupMicPulse {

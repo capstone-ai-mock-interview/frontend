@@ -7,7 +7,6 @@ import {
   Clock3,
   FileText,
   Mic,
-  Sparkles,
   UserRound,
   UsersRound,
 } from "lucide-react";
@@ -31,6 +30,29 @@ const STEPS = [
   { id: 2, label: "이력서/직무" },
   { id: 3, label: "면접 시간" },
   { id: 4, label: "마이크 체크" },
+];
+
+const STEP_COPY = [
+  {
+    title: "어떤 방식으로 연습할까요?",
+    description:
+      "혼자 집중해서 답변을 다듬거나, 여러 명이 함께 들어가는 그룹 면접을 준비할 수 있어요.",
+  },
+  {
+    title: "이력서와 지원 직무를 맞춰주세요",
+    description:
+      "선택한 정보는 질문의 방향과 피드백의 기준을 잡는 데 사용됩니다.",
+  },
+  {
+    title: "연습 시간을 정해주세요",
+    description:
+      "전체 면접 시간 안에서 질문별 답변 시간은 최대 1분 30초로 제한됩니다.",
+  },
+  {
+    title: "마이크를 확인하고 시작하세요",
+    description:
+      "음성 인식이 안정적으로 동작하는지 확인한 뒤 면접을 시작합니다.",
+  },
 ];
 
 export default function SessionSetupForm({ onSubmit, isSubmitting }) {
@@ -58,6 +80,7 @@ export default function SessionSetupForm({ onSubmit, isSubmitting }) {
   const animationRef = useRef(null);
   const testStartedAtRef = useRef(0);
   const maxLevelRef = useRef(0);
+  const smoothedLevelRef = useRef(0);
   const reduceMotion = useReducedMotion();
 
   const isGroup = interviewMode === "GROUP";
@@ -93,6 +116,7 @@ export default function SessionSetupForm({ onSubmit, isSubmitting }) {
       const src = ctx.createMediaStreamSource(stream);
       const analyser = ctx.createAnalyser();
       analyser.fftSize = 512;
+      analyser.smoothingTimeConstant = 0.2;
       src.connect(analyser);
       const data = new Uint8Array(analyser.fftSize);
       streamRef.current = stream;
@@ -109,9 +133,14 @@ export default function SessionSetupForm({ onSubmit, isSubmitting }) {
           sum += n * n;
         }
         const lvl = Math.sqrt(sum / data.length);
-        maxLevelRef.current = Math.max(maxLevelRef.current, lvl);
-        setAudioLevel(lvl);
-        if (lvl > 0.02) setAudioDetected(true);
+        const prev = smoothedLevelRef.current;
+        const next =
+          lvl >= prev ? prev * 0.35 + lvl * 0.65 : prev * 0.6 + lvl * 0.4;
+        const normalized = next < 0.004 ? 0 : next;
+        smoothedLevelRef.current = normalized;
+        maxLevelRef.current = Math.max(maxLevelRef.current, normalized);
+        setAudioLevel(normalized);
+        if (normalized > 0.02) setAudioDetected(true);
         animationRef.current = window.requestAnimationFrame(loop);
       };
       animationRef.current = window.requestAnimationFrame(loop);
@@ -135,6 +164,8 @@ export default function SessionSetupForm({ onSubmit, isSubmitting }) {
       contextRef.current = null;
     }
     setIsTestingMic(false);
+    smoothedLevelRef.current = 0;
+    setAudioLevel(0);
     if (!validate) return;
     setMicPassed(
       Date.now() - testStartedAtRef.current >= 2000 && maxLevelRef.current > 0.02
@@ -162,14 +193,31 @@ export default function SessionSetupForm({ onSubmit, isSubmitting }) {
   const summaryItems = useMemo(
     () => [
       {
+        key: "mode",
+        done: step > 1,
         label: "유형",
         value: isGroup ? `그룹 면접 (${maxParticipants}명)` : "일반 면접",
       },
-      { label: "직무", value: selectedJob?.label ?? jobField },
-      { label: "시간", value: `${durationMinutes}분` },
-      { label: "이력서", value: selectedResume ? selectedResume.title : "미선택" },
+      {
+        key: "job",
+        done: step > 2,
+        label: "직무",
+        value: selectedJob?.label ?? jobField,
+      },
+      {
+        key: "resume",
+        done: step > 2,
+        label: "이력서",
+        value: selectedResume ? selectedResume.title : "미선택",
+      },
+      {
+        key: "time",
+        done: step > 3,
+        label: "시간",
+        value: `${durationMinutes}분`,
+      },
     ],
-    [durationMinutes, isGroup, jobField, maxParticipants, selectedJob, selectedResume]
+    [durationMinutes, isGroup, jobField, maxParticipants, selectedJob, selectedResume, step]
   );
 
   const panelMotion = reduceMotion
@@ -213,14 +261,6 @@ export default function SessionSetupForm({ onSubmit, isSubmitting }) {
 
   const Step1 = (
     <motion.div className="setup-step-body" {...panelMotion}>
-      <div className="setup-step-title">
-        <p className="eyebrow">Interview Mode</p>
-        <h2>어떤 방식으로 연습할까요?</h2>
-        <p className="subtext">
-          혼자 집중해서 답변을 다듬거나, 여러 명이 함께 들어가는 그룹 면접을 준비할 수 있어요.
-        </p>
-      </div>
-
       <div className="setup-choice-grid">
         {renderModeCard({
           value: "SOLO",
@@ -269,14 +309,6 @@ export default function SessionSetupForm({ onSubmit, isSubmitting }) {
 
   const Step2 = (
     <motion.div className="setup-step-body" {...panelMotion}>
-      <div className="setup-step-title">
-        <p className="eyebrow">Profile</p>
-        <h2>이력서와 지원 직무를 맞춰주세요</h2>
-        <p className="subtext">
-          선택한 정보는 질문의 방향과 피드백의 기준을 잡는 데 사용됩니다.
-        </p>
-      </div>
-
       <div className="setup-soft-panel">
         {resumeLoading ? (
           <p className="subtext">이력서 목록을 불러오는 중...</p>
@@ -329,14 +361,6 @@ export default function SessionSetupForm({ onSubmit, isSubmitting }) {
 
   const Step3 = (
     <motion.div className="setup-step-body" {...panelMotion}>
-      <div className="setup-step-title">
-        <p className="eyebrow">Duration</p>
-        <h2>연습 시간을 정해주세요</h2>
-        <p className="subtext">
-          전체 면접 시간 안에서 질문별 답변 시간은 최대 1분 30초로 제한됩니다.
-        </p>
-      </div>
-
       <label className="field">
         <span>면접 시간</span>
         <div className="setup-time-grid">
@@ -363,14 +387,6 @@ export default function SessionSetupForm({ onSubmit, isSubmitting }) {
 
   const Step4 = (
     <motion.div className="setup-step-body" {...panelMotion}>
-      <div className="setup-step-title">
-        <p className="eyebrow">Device Check</p>
-        <h2>마이크를 확인하고 시작하세요</h2>
-        <p className="subtext">
-          음성 인식이 안정적으로 동작하는지 확인한 뒤 면접을 시작합니다.
-        </p>
-      </div>
-
       <div className="setup-mic-panel">
         <div className="setup-mic-orb-wrap">
           {isTestingMic && <span className="setup-mic-pulse" />}
@@ -441,6 +457,7 @@ export default function SessionSetupForm({ onSubmit, isSubmitting }) {
   );
 
   const stepContent = [Step1, Step2, Step3, Step4][step - 1];
+  const currentCopy = STEP_COPY[step - 1];
   return (
     <div className="setup-page">
       <section className="setup-layout">
@@ -452,13 +469,9 @@ export default function SessionSetupForm({ onSubmit, isSubmitting }) {
         >
           <div className="setup-hero-row">
             <div>
-              <p className="eyebrow">Interview Setup</p>
-              <h1>면접 전, 딱 필요한 것만 정리해요</h1>
+              <h1>{currentCopy.title}</h1>
+              <p className="subtext">{currentCopy.description}</p>
             </div>
-            <span className="setup-live-chip">
-              <Sparkles size={14} />
-              Ready
-            </span>
           </div>
 
           <AnimatePresence mode="wait">{stepContent}</AnimatePresence>
@@ -504,13 +517,15 @@ export default function SessionSetupForm({ onSubmit, isSubmitting }) {
           transition={{ duration: 0.35, ease: "easeOut", delay: 0.08 }}
         >
           <div className="setup-summary-head">
-            <span className="setup-summary-kicker">Current Setup</span>
             <h2>면접 준비 현황</h2>
           </div>
 
           <div className="setup-summary-list">
             {summaryItems.map((item) => (
-              <div className="setup-summary-item" key={item.label}>
+              <div
+                className={`setup-summary-item ${item.done ? "is-done" : ""}`}
+                key={item.key}
+              >
                 <span>{item.label}</span>
                 <strong>{item.value}</strong>
               </div>
