@@ -36,11 +36,9 @@ export default function ResultView({ result, onRestart, onOpenHistory }) {
         <h3>종합 평가</h3>
         <div className="score-chip">종합 평가: {overallScore}</div>
         <p className="subtext compact">현재 레벨: {level}</p>
-        <div className="feedback-summary-box">
-          <p className="subtext" style={{ whiteSpace: "pre-wrap" }}>
-            {result.totalFeedback}
-          </p>
-        </div>
+        <p className="subtext result-summary-text" style={{ whiteSpace: "pre-wrap" }}>
+          {result.totalFeedback}
+        </p>
       </section>
 
       {Object.keys(chartData).length > 0 && (
