@@ -711,12 +711,12 @@ input:focus, select:focus {
     rgba(37, 99, 235, .085) 0,
     rgba(37, 99, 235, .085) 1.5px,
     transparent 1.5px,
-    transparent 16px
+    transparent 40px
   );
   mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
   opacity: .86;
   pointer-events: none;
-  animation: home-pattern-drift 18s linear infinite;
+  animation: home-pattern-drift 34s linear infinite;
 }
 .home-hero {
   text-align: center;
@@ -1214,7 +1214,7 @@ input:focus, select:focus {
     background-position: 0 0;
   }
   to {
-    background-position: 36px 36px;
+    background-position: 80px 80px;
   }
 }
 
