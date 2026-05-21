@@ -718,26 +718,6 @@ input:focus, select:focus {
   pointer-events: none;
   animation: home-pattern-drift 18s linear infinite;
 }
-.home-card::after {
-  content: "";
-  position: absolute;
-  inset: 32px 0 120px;
-  z-index: -1;
-  background: linear-gradient(
-    126deg,
-    transparent 25%,
-    rgba(147, 197, 253, .1) 38%,
-    rgba(255, 255, 255, .72) 47%,
-    rgba(96, 165, 250, .22) 55%,
-    transparent 70%
-  );
-  filter: blur(.35px);
-  opacity: .95;
-  pointer-events: none;
-  transform: translate3d(-128%, -32%, 0) skewX(-8deg);
-  animation: home-background-shine 6.2s cubic-bezier(.45, 0, .25, 1) infinite;
-}
-
 .home-hero {
   text-align: center;
   padding: 56px 24px 52px;
@@ -993,8 +973,7 @@ input:focus, select:focus {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .home-card::before,
-  .home-card::after {
+  .home-card::before {
     animation: none;
   }
 
@@ -1236,15 +1215,6 @@ input:focus, select:focus {
   }
   to {
     background-position: 36px 36px;
-  }
-}
-
-@keyframes home-background-shine {
-  0% {
-    transform: translate3d(-128%, -32%, 0) skewX(-8deg);
-  }
-  100% {
-    transform: translate3d(128%, 32%, 0) skewX(-8deg);
   }
 }
 
