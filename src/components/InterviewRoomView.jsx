@@ -44,7 +44,7 @@ const LOG_BG_COLOR = {
   ERROR: "bg-rose-50/60",
 };
 
-const QUESTION_TYPE_INTERVAL_MS = 45;
+const QUESTION_TYPE_INTERVAL_MS = 135;
 
 export default function InterviewRoomView({
   isConnected = false,
