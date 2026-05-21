@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Navigate, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
 import { deleteMe, fetchMe, login, logout, signup, updateMe } from "./api/authApi";
-import ApiTestPage from "./components/ApiTestPage";
 import {
   deleteInterviewRecord,
   fetchInterviewRecordDetail,
@@ -35,7 +34,6 @@ const ROUTE = {
   LOGIN: "/login",
   SIGNUP: "/signup",
   MYPAGE: "/mypage",
-  API_TEST: "/api-test",
   SETUP: "/interview/setup",
   LOBBY: "/interview/lobby",
   JOIN: "/interview/join",
@@ -617,7 +615,6 @@ export default function App() {
             )
           }
         />
-        <Route path={ROUTE.API_TEST} element={<ApiTestPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     );
@@ -696,15 +693,6 @@ export default function App() {
                 로그인
               </button>
             )}
-            <button
-              className={`nav-link ${location.pathname === ROUTE.API_TEST ? "is-active" : ""}`}
-              type="button"
-              onClick={() => navigate(ROUTE.API_TEST)}
-              title="API 테스트 페이지"
-              style={{ fontSize: 12, color: "var(--slate-400)" }}
-            >
-              API Test
-            </button>
           </div>
         </div>
       </header>
