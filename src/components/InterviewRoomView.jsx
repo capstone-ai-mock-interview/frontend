@@ -9,6 +9,7 @@
  *   - SYSTEM 로그는 컨테이너에서 미리 필터링되어 들어옴
  */
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { useEffect, useMemo, useState } from "react";
 import { Mic, MicOff, ChevronRight, Square, Wifi, WifiOff, Clock } from "lucide-react";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
@@ -42,6 +43,8 @@ const LOG_BG_COLOR = {
   ALERT: "bg-rose-50/60", WARN: "bg-amber-50/60",
   ERROR: "bg-rose-50/60",
 };
+
+const QUESTION_TYPE_INTERVAL_MS = 45;
 
 export default function InterviewRoomView({
   isConnected = false,
@@ -88,6 +91,37 @@ export default function InterviewRoomView({
     : null;
   // prefers-reduced-motion 사용자에게는 모션 없이 정적 배경만 노출
   const reduceMotion = useReducedMotion();
+  const [typedQuestionText, setTypedQuestionText] = useState("");
+  const shouldTypeQuestion = currentTurn === "ai" && Boolean(questionText);
+
+  useEffect(() => {
+    if (!shouldTypeQuestion) {
+      setTypedQuestionText(questionText);
+      return undefined;
+    }
+
+    if (reduceMotion) {
+      setTypedQuestionText(questionText);
+      return undefined;
+    }
+
+    let nextLength = 0;
+    setTypedQuestionText("");
+    const timer = window.setInterval(() => {
+      nextLength = Math.min(questionText.length, nextLength + 1);
+      setTypedQuestionText(questionText.slice(0, nextLength));
+
+      if (nextLength >= questionText.length) {
+        window.clearInterval(timer);
+      }
+    }, QUESTION_TYPE_INTERVAL_MS);
+
+    return () => window.clearInterval(timer);
+  }, [currentTurn, questionText, reduceMotion, shouldTypeQuestion]);
+
+  const visibleQuestionText = useMemo(() => (
+    shouldTypeQuestion ? typedQuestionText : questionText
+  ), [questionText, shouldTypeQuestion, typedQuestionText]);
 
   // 블롭 애니메이션 variants (우상단 yellow / 좌하단 blue)
   // x/y 는 viewport 단위라 화면 크기와 무관하게 중앙으로 모임.
@@ -265,7 +299,7 @@ export default function InterviewRoomView({
                     transition={{ duration: 0.3 }}
                     className="text-[26px] leading-[1.5] font-semibold text-slate-900 tracking-tight text-pretty mb-8"
                   >
-                    {questionText || <span className="text-slate-400">질문을 기다리는 중...</span>}
+                    {visibleQuestionText || <span className="text-slate-400">질문을 기다리는 중...</span>}
                   </motion.h2>
                 </AnimatePresence>
 
