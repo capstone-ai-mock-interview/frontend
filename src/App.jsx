@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Navigate, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
 import { deleteMe, fetchMe, login, logout, signup, updateMe } from "./api/authApi";
-import ApiTestPage from "./components/ApiTestPage";
 import {
   deleteInterviewRecord,
   fetchInterviewRecordDetail,
@@ -35,7 +34,6 @@ const ROUTE = {
   LOGIN: "/login",
   SIGNUP: "/signup",
   MYPAGE: "/mypage",
-  API_TEST: "/api-test",
   SETUP: "/interview/setup",
   LOBBY: "/interview/lobby",
   JOIN: "/interview/join",
@@ -617,7 +615,6 @@ export default function App() {
             )
           }
         />
-        <Route path={ROUTE.API_TEST} element={<ApiTestPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     );
@@ -631,12 +628,12 @@ export default function App() {
   return (
     <>
       {!isInterviewRoom && (
-      <header className="app-header">
+      <header className={`app-header ${showNavActions ? "has-nav" : ""}`}>
         <div className="nav-inner">
           <button className="nav-logo" type="button" onClick={() => navigate(ROUTE.HOME)}>
             AI<span>면접</span>
           </button>
-          <div className="header-actions">
+          <nav className="header-nav" aria-label="주요 메뉴">
             {showNavActions && (
               <>
                 <button
@@ -667,44 +664,38 @@ export default function App() {
                 >
                   면접 기록
                 </button>
-                <div className="nav-divider" />
+                <button
+                  className={`nav-link ${
+                    location.pathname === ROUTE.MYPAGE ? "is-active" : ""
+                  }`}
+                  type="button"
+                  onClick={() => navigate(ROUTE.MYPAGE)}
+                >
+                  마이페이지
+                </button>
               </>
             )}
+          </nav>
+          <div className="header-actions">
             {user && (
-              <button
-                className={`chip success chip-btn ${
-                  location.pathname === ROUTE.MYPAGE ? "is-active" : ""
-                }`}
-                type="button"
-                onClick={() => navigate(ROUTE.MYPAGE)}
-                title="마이페이지"
-              >
+              <span className="user-label" title={user.loginId}>
                 {user.name || user.loginId} 님
-              </button>
+              </span>
             )}
             {showNavActions && (
-              <button className="ghost-btn" type="button" onClick={signOut}>
+              <button className="header-auth-btn" type="button" onClick={signOut}>
                 로그아웃
               </button>
             )}
             {!user && !isAuthPage && (
               <button
-                className="primary-btn"
+                className="header-auth-btn is-primary"
                 type="button"
                 onClick={() => navigate(ROUTE.LOGIN)}
               >
                 로그인
               </button>
             )}
-            <button
-              className={`nav-link ${location.pathname === ROUTE.API_TEST ? "is-active" : ""}`}
-              type="button"
-              onClick={() => navigate(ROUTE.API_TEST)}
-              title="API 테스트 페이지"
-              style={{ fontSize: 12, color: "var(--slate-400)" }}
-            >
-              API Test
-            </button>
           </div>
         </div>
       </header>
