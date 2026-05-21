@@ -391,8 +391,8 @@ export default function InterviewRoomView({
         transition={{ duration: 0.4, ease: "easeOut", delay: 0.3 }}
         className="absolute bottom-10 left-10 right-[380px] z-20"
       >
-        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-6 px-6 py-4 bg-white/20 backdrop-blur-3xl backdrop-saturate-200 border-[3px] border-white/90 rounded-2xl shadow-2xl shadow-blue-900/20" style={{ outline: '1.5px solid rgba(255,255,255,0.6)', outlineOffset: '-6px' }}>
-          <div className="col-start-2 flex items-center justify-center gap-10">
+        <div className="relative h-[92px] px-6 py-4 bg-white/20 backdrop-blur-3xl backdrop-saturate-200 border-[3px] border-white/90 rounded-2xl shadow-2xl shadow-blue-900/20" style={{ outline: '1.5px solid rgba(255,255,255,0.6)', outlineOffset: '-6px' }}>
+          <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center gap-10">
             {/* End Interview */}
             <Button
               variant="ghost"
@@ -480,7 +480,7 @@ export default function InterviewRoomView({
           </div>
 
           {/* Audio Level Visualizer */}
-          <div className="col-start-3 justify-self-end flex items-center gap-[3px] h-10">
+          <div className="absolute right-8 top-1/2 flex h-10 -translate-y-1/2 items-center gap-[3px]">
             {Array.from({ length: 12 }).map((_, i) => {
               const barThreshold = (i + 1) / 12;
               const isActive = isMicOn && audioLevel >= barThreshold * 0.8;
