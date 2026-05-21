@@ -81,6 +81,9 @@ export default function SessionSetupForm({ onSubmit, isSubmitting }) {
   const testStartedAtRef = useRef(0);
   const maxLevelRef = useRef(0);
   const smoothedLevelRef = useRef(0);
+  const noiseFloorRef = useRef(0);
+  const speechMsRef = useRef(0);
+  const lastAudioTickRef = useRef(0);
   const reduceMotion = useReducedMotion();
 
   const isGroup = interviewMode === "GROUP";
@@ -110,37 +113,67 @@ export default function SessionSetupForm({ onSubmit, isSubmitting }) {
       setMicPassed(false);
       setAudioDetected(false);
       maxLevelRef.current = 0;
+      smoothedLevelRef.current = 0;
+      noiseFloorRef.current = 0;
+      speechMsRef.current = 0;
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const Ctx = window.AudioContext || window.webkitAudioContext;
       const ctx = new Ctx();
       const src = ctx.createMediaStreamSource(stream);
       const analyser = ctx.createAnalyser();
-      analyser.fftSize = 512;
-      analyser.smoothingTimeConstant = 0.2;
+      analyser.fftSize = 1024;
+      analyser.smoothingTimeConstant = 0.05;
       src.connect(analyser);
       const data = new Uint8Array(analyser.fftSize);
       streamRef.current = stream;
       contextRef.current = ctx;
-      testStartedAtRef.current = Date.now();
+      testStartedAtRef.current = performance.now();
+      lastAudioTickRef.current = testStartedAtRef.current;
       setAudioPermission("granted");
       setIsTestingMic(true);
 
       const loop = () => {
+        const now = performance.now();
+        const elapsed = now - testStartedAtRef.current;
+        const delta = Math.min(100, now - lastAudioTickRef.current);
+        lastAudioTickRef.current = now;
         analyser.getByteTimeDomainData(data);
         let sum = 0;
         for (let i = 0; i < data.length; i++) {
           const n = (data[i] - 128) / 128;
           sum += n * n;
         }
-        const lvl = Math.sqrt(sum / data.length);
+        const rms = Math.sqrt(sum / data.length);
+        const isCalibrating = elapsed < 650;
+        if (isCalibrating) {
+          noiseFloorRef.current =
+            noiseFloorRef.current === 0
+              ? rms
+              : noiseFloorRef.current * 0.85 + rms * 0.15;
+        }
+
+        const noiseFloor = Math.max(noiseFloorRef.current, 0.006);
+        const threshold = Math.max(noiseFloor * 2.8, 0.018);
+        const signal = Math.max(0, Math.min(1, (rms - threshold) / 0.12));
         const prev = smoothedLevelRef.current;
         const next =
-          lvl >= prev ? prev * 0.35 + lvl * 0.65 : prev * 0.6 + lvl * 0.4;
-        const normalized = next < 0.004 ? 0 : next;
+          signal >= prev ? prev * 0.2 + signal * 0.8 : prev * 0.55 + signal * 0.45;
+        const normalized = next < 0.015 ? 0 : next;
         smoothedLevelRef.current = normalized;
         maxLevelRef.current = Math.max(maxLevelRef.current, normalized);
         setAudioLevel(normalized);
-        if (normalized > 0.02) setAudioDetected(true);
+
+        if (!isCalibrating && rms > threshold) {
+          speechMsRef.current += delta;
+        } else {
+          speechMsRef.current = Math.max(0, speechMsRef.current - delta * 1.5);
+        }
+
+        if (speechMsRef.current >= 450) {
+          setAudioDetected(true);
+          setMicPassed(true);
+        }
+
         animationRef.current = window.requestAnimationFrame(loop);
       };
       animationRef.current = window.requestAnimationFrame(loop);
@@ -167,9 +200,7 @@ export default function SessionSetupForm({ onSubmit, isSubmitting }) {
     smoothedLevelRef.current = 0;
     setAudioLevel(0);
     if (!validate) return;
-    setMicPassed(
-      Date.now() - testStartedAtRef.current >= 2000 && maxLevelRef.current > 0.02
-    );
+    setMicPassed(speechMsRef.current >= 450 || maxLevelRef.current > 0.4);
   };
 
   const goNext = () => setStep((s) => Math.min(STEPS.length, s + 1));
@@ -194,27 +225,27 @@ export default function SessionSetupForm({ onSubmit, isSubmitting }) {
     () => [
       {
         key: "mode",
-        done: step > 1,
+        status: step > 1 ? "done" : step === 1 ? "active" : "pending",
         label: "유형",
-        value: isGroup ? `그룹 면접 (${maxParticipants}명)` : "일반 면접",
+        value: step >= 1 ? (isGroup ? `그룹 면접 (${maxParticipants}명)` : "일반 면접") : "",
       },
       {
         key: "job",
-        done: step > 2,
+        status: step > 2 ? "done" : step === 2 ? "active" : "pending",
         label: "직무",
-        value: selectedJob?.label ?? jobField,
+        value: step >= 2 ? selectedJob?.label ?? jobField : "",
       },
       {
         key: "resume",
-        done: step > 2,
+        status: step > 2 ? "done" : step === 2 ? "active" : "pending",
         label: "이력서",
-        value: selectedResume ? selectedResume.title : "미선택",
+        value: step >= 2 ? selectedResume ? selectedResume.title : "미선택" : "",
       },
       {
         key: "time",
-        done: step > 3,
+        status: step > 3 ? "done" : step === 3 ? "active" : "pending",
         label: "시간",
-        value: `${durationMinutes}분`,
+        value: step >= 3 ? `${durationMinutes}분` : "",
       },
     ],
     [durationMinutes, isGroup, jobField, maxParticipants, selectedJob, selectedResume, step]
@@ -408,7 +439,7 @@ export default function SessionSetupForm({ onSubmit, isSubmitting }) {
           <div className="audio-meter setup-audio-meter">
             <div
               className="audio-meter-fill"
-              style={{ width: `${Math.min(100, audioLevel * 900)}%` }}
+              style={{ width: `${Math.min(100, audioLevel * 100)}%` }}
             />
           </div>
 
@@ -523,11 +554,11 @@ export default function SessionSetupForm({ onSubmit, isSubmitting }) {
           <div className="setup-summary-list">
             {summaryItems.map((item) => (
               <div
-                className={`setup-summary-item ${item.done ? "is-done" : ""}`}
+                className={`setup-summary-item is-${item.status}`}
                 key={item.key}
               >
                 <span>{item.label}</span>
-                <strong>{item.value}</strong>
+                {item.value && <strong>{item.value}</strong>}
               </div>
             ))}
           </div>
