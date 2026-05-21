@@ -59,7 +59,7 @@ export default function CompetencyRadarChart({ chartData, strengthTypes, weaknes
           <div className="competency-analysis">
             {strengths.length > 0 && (
               <div className="analysis-section strength">
-                <h4>💪 강점</h4>
+                <h4>강점 유형</h4>
                 {strengths.map((item, i) => (
                   <p key={i}><strong>{item.type}</strong> — {item.comment}</p>
                 ))}
@@ -67,7 +67,7 @@ export default function CompetencyRadarChart({ chartData, strengthTypes, weaknes
             )}
             {weaknesses.length > 0 && (
               <div className="analysis-section weakness">
-                <h4>📝 보완점</h4>
+                <h4>약점 유형</h4>
                 {weaknesses.map((item, i) => (
                   <p key={i}><strong>{item.type}</strong> — {item.comment}</p>
                 ))}
