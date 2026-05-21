@@ -177,6 +177,23 @@ export default function InterviewRoom({
         return;
       }
 
+      if (msg.type === "QUESTION_SPEAKING") {
+        const { turnNumber, text, targetIdentity: target } = msg.payload || {};
+        if (typeof turnNumber === "number" && turnNumber !== turnRef.current) {
+          console.warn(`[InterviewRoom] 턴 번호 불일치: client=${turnRef.current}, agent=${turnNumber}.`);
+          addLog("WARN", `턴 번호 불일치 감지 (서버=${turnRef.current}, 면접관=${turnNumber}). 면접관 값으로 갱신합니다.`);
+          updateTurn(turnNumber);
+        }
+        setTargetIdentity(target || null);
+        setCurrentQuestion(text);
+        setWaitingForAgent(false);
+        setWarningVisible(false);
+        setAnswerExpiresAt(null);
+        setCurrentTurnRole("ai");
+        void setLocalMicPublish(false);
+        return;
+      }
+
       if (msg.type === "QUESTION") {
         const { turnNumber, text, targetIdentity: target } = msg.payload || {};
         if (typeof turnNumber === "number" && turnNumber !== turnRef.current) {
