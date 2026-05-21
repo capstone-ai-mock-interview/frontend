@@ -728,12 +728,12 @@ input:focus, select:focus {
   width: 100vw;
   z-index: -1;
   background:
-    radial-gradient(circle at 16% 30%, rgba(255, 255, 255, .82) 0 1.5%, rgba(255, 255, 255, 0) 2.6%, rgba(255, 255, 255, 0) 9%, rgba(255, 255, 255, .58) 10.2%, rgba(191, 219, 254, .3) 11.5%, rgba(255, 255, 255, 0) 14%),
-    radial-gradient(circle at 38% 72%, rgba(255, 255, 255, .68) 0 1.2%, rgba(255, 255, 255, 0) 2.4%, rgba(255, 255, 255, 0) 8%, rgba(219, 234, 254, .5) 9.4%, rgba(255, 255, 255, .32) 10.8%, rgba(255, 255, 255, 0) 13.5%),
-    radial-gradient(circle at 62% 22%, rgba(255, 255, 255, .72) 0 1.4%, rgba(255, 255, 255, 0) 2.5%, rgba(255, 255, 255, 0) 7.5%, rgba(255, 255, 255, .52) 9%, rgba(147, 197, 253, .26) 10.5%, rgba(255, 255, 255, 0) 13%),
-    radial-gradient(circle at 84% 62%, rgba(255, 255, 255, .62) 0 1.2%, rgba(255, 255, 255, 0) 2.3%, rgba(255, 255, 255, 0) 9%, rgba(191, 219, 254, .48) 10.8%, rgba(255, 255, 255, .28) 12%, rgba(255, 255, 255, 0) 15%);
-  filter: blur(3px);
-  opacity: .82;
+    radial-gradient(circle at 16% 30%, rgba(255, 255, 255, 0) 0 9%, rgba(255, 255, 255, .42) 10.2%, rgba(191, 219, 254, .22) 11.5%, rgba(255, 255, 255, 0) 14%),
+    radial-gradient(circle at 38% 72%, rgba(255, 255, 255, 0) 0 8%, rgba(219, 234, 254, .38) 9.4%, rgba(255, 255, 255, .22) 10.8%, rgba(255, 255, 255, 0) 13.5%),
+    radial-gradient(circle at 62% 22%, rgba(255, 255, 255, 0) 0 7.5%, rgba(255, 255, 255, .36) 9%, rgba(147, 197, 253, .18) 10.5%, rgba(255, 255, 255, 0) 13%),
+    radial-gradient(circle at 84% 62%, rgba(255, 255, 255, 0) 0 9%, rgba(191, 219, 254, .34) 10.8%, rgba(255, 255, 255, .18) 12%, rgba(255, 255, 255, 0) 15%);
+  filter: blur(8px);
+  opacity: .58;
   pointer-events: none;
   transform: translate3d(-50%, 0, 0);
   animation: home-light-drift 26s ease-in-out infinite alternate;
