@@ -708,13 +708,13 @@ input:focus, select:focus {
   z-index: -1;
   background: repeating-linear-gradient(
     135deg,
-    rgba(37, 99, 235, .055) 0,
-    rgba(37, 99, 235, .055) 1px,
-    transparent 1px,
-    transparent 18px
+    rgba(37, 99, 235, .085) 0,
+    rgba(37, 99, 235, .085) 1.5px,
+    transparent 1.5px,
+    transparent 16px
   );
-  mask-image: linear-gradient(90deg, transparent, #000 16%, #000 84%, transparent);
-  opacity: .72;
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  opacity: .86;
   pointer-events: none;
   animation: home-pattern-drift 18s linear infinite;
 }
