@@ -817,6 +817,21 @@ input:focus, select:focus {
 .qa-item h4 { font-size: 15px; font-weight: 700; }
 .qa-item p  { font-size: 14px; color: var(--slate-700); }
 
+.result-feedback-card .feedback-summary-box,
+.result-feedback-card .qa-item {
+  background: var(--surface);
+  color: var(--slate-900);
+}
+.result-feedback-card .feedback-summary-box {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 18px;
+}
+.result-feedback-card .feedback-summary-box .subtext,
+.result-feedback-card .qa-item p {
+  color: var(--slate-800);
+}
+
 /* ═══════════════════════════════════════════════════
    History
 ═══════════════════════════════════════════════════ */
