@@ -499,6 +499,47 @@ export default function InterviewRoomView({
               </>
             )}
           </Button>
+
+          {/* Audio Level Visualizer */}
+          <div className="flex items-center gap-[3px] h-10">
+            {Array.from({ length: 12 }).map((_, i) => {
+              const barThreshold = (i + 1) / 12;
+              const isActive = isMicOn && audioLevel >= barThreshold * 0.8;
+              const barColor = i < 8 ? "bg-blue-500" : i < 10 ? "bg-amber-400" : "bg-rose-400";
+              return (
+                <motion.div
+                  key={i}
+                  animate={{
+                    scaleY: isActive ? 0.4 + (audioLevel * 0.6) : 0.15,
+                    opacity: isActive ? 1 : 0.3,
+                  }}
+                  transition={{ duration: 0.05, ease: "linear" }}
+                  className={cn(
+                    "w-[4px] h-full rounded-full origin-bottom",
+                    isActive ? barColor : "bg-slate-300"
+                  )}
+                />
+              );
+            })}
+          </div>
+          <Button
+            variant="ghost"
+            onClick={onNextQuestion}
+            disabled={!canAskNext || nextLoading || ending}
+            className="rounded-xl px-8 h-14 text-slate-700 hover:bg-slate-100 gap-2 font-medium"
+          >
+            {nextLoading ? (
+              <>
+                <span className="w-4 h-4 border-2 border-slate-300 border-t-blue-600 rounded-full animate-spin" />
+                <span className="text-sm">요청 중</span>
+              </>
+            ) : (
+              <>
+                <span className="text-sm">다음 질문</span>
+                <ChevronRight className="size-4" />
+              </>
+            )}
+          </Button>
         </div>
       </motion.div>
     </div>

@@ -867,7 +867,6 @@ input:focus, select:focus {
   display: grid;
   gap: 14px;
   width: 100%;
-  max-width: 480px;
   text-align: center;
 }
 
