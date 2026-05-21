@@ -722,20 +722,21 @@ input:focus, select:focus {
 .home-card::after {
   content: "";
   position: absolute;
-  top: 18px;
-  bottom: -92px;
+  top: -8px;
+  bottom: -118px;
   left: 50%;
   width: 100vw;
   z-index: -1;
   background:
-    radial-gradient(circle at 22% 30%, rgba(255, 255, 255, .42), rgba(255, 255, 255, 0) 13%),
-    radial-gradient(circle at 68% 18%, rgba(255, 255, 255, .28), rgba(255, 255, 255, 0) 10%),
-    radial-gradient(circle at 78% 68%, rgba(219, 234, 254, .34), rgba(219, 234, 254, 0) 15%);
-  filter: blur(18px);
-  opacity: .52;
+    radial-gradient(circle at 18% 34%, rgba(255, 255, 255, .62) 0 5%, rgba(255, 255, 255, .2) 10%, rgba(255, 255, 255, 0) 18%),
+    radial-gradient(circle at 36% 72%, rgba(219, 234, 254, .5) 0 4%, rgba(219, 234, 254, .18) 11%, rgba(219, 234, 254, 0) 20%),
+    radial-gradient(circle at 62% 24%, rgba(255, 255, 255, .46) 0 4%, rgba(255, 255, 255, .15) 9%, rgba(255, 255, 255, 0) 17%),
+    radial-gradient(circle at 82% 62%, rgba(191, 219, 254, .44) 0 5%, rgba(191, 219, 254, .16) 12%, rgba(191, 219, 254, 0) 21%);
+  filter: blur(16px);
+  opacity: .68;
   pointer-events: none;
   transform: translate3d(-50%, 0, 0);
-  animation: home-light-drift 28s ease-in-out infinite alternate;
+  animation: home-light-drift 32s ease-in-out infinite alternate;
 }
 .home-hero {
   text-align: center;
@@ -1230,13 +1231,13 @@ input:focus, select:focus {
 
 @keyframes home-light-drift {
   0% {
-    transform: translate3d(calc(-50% - 18px), 8px, 0) scale(1);
+    transform: translate3d(calc(-50% - 28px), 14px, 0) scale(1);
   }
   50% {
-    transform: translate3d(calc(-50% + 18px), -12px, 0) scale(1.03);
+    transform: translate3d(calc(-50% + 24px), -18px, 0) scale(1.04);
   }
   100% {
-    transform: translate3d(calc(-50% + 34px), 14px, 0) scale(1.01);
+    transform: translate3d(calc(-50% + 42px), 18px, 0) scale(1.02);
   }
 }
 
