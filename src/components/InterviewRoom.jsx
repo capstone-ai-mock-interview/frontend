@@ -13,6 +13,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Room, RoomEvent } from "livekit-client";
 import useCountdown from "../hooks/useCountdown";
 import useNextQuestionGuard from "../hooks/useNextQuestionGuard";
+import useAudioLevel from "../hooks/useAudioLevel";
 import { getInterviewResult, nextQuestion } from "../api/interviewApi";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
@@ -53,7 +54,7 @@ export default function InterviewRoom({
   const isGroup = session.mode === "GROUP";
   const myIdentity = session.myIdentity || localIdentity;
   myIdentityRef.current = myIdentity || "";
-  const isMyActiveTurn = !isGroup || !targetIdentity || targetIdentity === myIdentity;
+  const isMyActiveTurn = !isGroup || (targetIdentity != null && targetIdentity === myIdentity);
 
   const answerTimeLimitSeconds = session.answerTimeLimitSeconds || 90;
   const totalDurationSeconds = session.totalDurationSeconds || session.durationMinutes * 60;
@@ -110,10 +111,11 @@ export default function InterviewRoom({
 
   const handleAnswerTimerExpire = useCallback(async () => {
     if (ending) return;
+    if (isGroup && !isMyActiveTurn) return;
     addLog("SYSTEM", `Q${turnRef.current} 답변 시간이 종료되었습니다. 다음 질문을 요청합니다.`);
     await requestNextQuestion();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ending]);
+  }, [ending, isGroup, isMyActiveTurn]);
 
   const interviewTimer = useCountdown({
     expiresAt: interviewExpiresAt,
@@ -283,6 +285,8 @@ export default function InterviewRoom({
   }, [isConnected, waitingForAgent, session.livekit?.isMock]);
 
   const isHost = session.role === "HOST";
+
+  const audioLevel = useAudioLevel({ enabled: isMicOn && isConnected && !ending });
 
   const requestNextQuestion = async () => {
     if (connectionError || !currentQuestion || !isMyActiveTurn || !canAskNextQuestion || ending) return;
@@ -499,6 +503,7 @@ export default function InterviewRoom({
       eventLog={visibleLogs}
 
       ambientState={ambientState}
+      audioLevel={audioLevel}
     />
   );
 }

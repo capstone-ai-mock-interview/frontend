@@ -81,6 +81,7 @@ export default function InterviewRoomView({
   myIdentity = null,
   isGroup = false,
   isHost = true,
+  audioLevel = 0,
 }) {
   const turnHint = isGroup && targetIdentity
     ? (targetIdentity === myIdentity ? "지금 답변할 차례입니다" : `답변 차례: ${targetIdentity}`)
@@ -454,6 +455,29 @@ export default function InterviewRoomView({
             >
               {isMicOn ? <Mic className="size-6" /> : <MicOff className="size-6" />}
             </Button>
+          </div>
+
+          {/* Audio Level Visualizer */}
+          <div className="flex items-center gap-[3px] h-10">
+            {Array.from({ length: 12 }).map((_, i) => {
+              const barThreshold = (i + 1) / 12;
+              const isActive = isMicOn && audioLevel >= barThreshold * 0.8;
+              const barColor = i < 8 ? "bg-blue-500" : i < 10 ? "bg-amber-400" : "bg-rose-400";
+              return (
+                <motion.div
+                  key={i}
+                  animate={{
+                    scaleY: isActive ? 0.4 + (audioLevel * 0.6) : 0.15,
+                    opacity: isActive ? 1 : 0.3,
+                  }}
+                  transition={{ duration: 0.05, ease: "linear" }}
+                  className={cn(
+                    "w-[4px] h-full rounded-full origin-bottom",
+                    isActive ? barColor : "bg-slate-300"
+                  )}
+                />
+              );
+            })}
           </div>
 
           {/* Next Question */}
