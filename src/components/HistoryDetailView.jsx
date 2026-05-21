@@ -45,7 +45,7 @@ export default function HistoryDetailView({ loading, record, onBack }) {
 
           {Object.keys(chartData).length > 0 && (
             <section className="panel">
-              <CompetencyRadarChart chartData={chartData} />
+              <CompetencyRadarChart chartData={chartData} strengthTypes={record.strengthTypes} weaknessTypes={record.weaknessTypes} />
             </section>
           )}
 

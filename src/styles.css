@@ -1158,3 +1158,49 @@ input:focus, select:focus {
 .chip-btn:hover:not(:disabled) { opacity: .85; transform: translateY(-1px); }
 
 } /* end @layer app */
+
+/* ═══════════════════════════════════════════════════
+   Competency Chart Layout
+═══════════════════════════════════════════════════ */
+.competency-layout {
+  display: grid;
+  gap: 16px;
+}
+.competency-layout.with-analysis {
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+}
+.competency-chart { min-width: 0; }
+.competency-analysis {
+  display: grid;
+  gap: 16px;
+}
+.analysis-section {
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  display: grid;
+  gap: 6px;
+}
+.analysis-section h4 {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.analysis-section p {
+  font-size: 13px;
+  color: var(--slate-700);
+  line-height: 1.6;
+}
+.analysis-section.strength {
+  background: var(--green-100);
+  border: 1px solid #bbf7d0;
+}
+.analysis-section.weakness {
+  background: var(--amber-100);
+  border: 1px solid #fcd34d;
+}
+@media (max-width: 700px) {
+  .competency-layout.with-analysis {
+    grid-template-columns: 1fr;
+  }
+}
