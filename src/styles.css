@@ -690,6 +690,8 @@ input:focus, select:focus {
    Home
 ═══════════════════════════════════════════════════ */
 .home-card {
+  position: relative;
+  isolation: isolate;
   display: grid;
   gap: 0;
   width: 100%;
@@ -698,7 +700,44 @@ input:focus, select:focus {
   padding: 0;
   box-shadow: none;
 }
-
+.home-card::before {
+  content: "";
+  position: absolute;
+  top: -32px;
+  bottom: -64px;
+  left: 50%;
+  width: 100vw;
+  z-index: -1;
+  background:
+    radial-gradient(circle at 18% 10%, rgba(255, 255, 255, .74), rgba(255, 255, 255, 0) 34%),
+    radial-gradient(circle at 84% 42%, rgba(219, 234, 254, .68), rgba(219, 234, 254, 0) 40%),
+    linear-gradient(145deg, rgba(255, 255, 255, .32), rgba(255, 255, 255, 0) 64%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .7);
+  backdrop-filter: blur(20px) saturate(140%);
+  mask-image: linear-gradient(180deg, transparent, #000 10%, #000 86%, transparent);
+  opacity: .86;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+.home-card::after {
+  content: "";
+  position: absolute;
+  top: -18px;
+  bottom: -128px;
+  left: 50%;
+  width: 100vw;
+  z-index: -1;
+  background:
+    radial-gradient(circle at 16% 30%, rgba(255, 255, 255, 0) 0 9%, rgba(255, 255, 255, .52) 10.2%, rgba(191, 219, 254, .28) 11.5%, rgba(255, 255, 255, 0) 14%),
+    radial-gradient(circle at 38% 72%, rgba(255, 255, 255, 0) 0 8%, rgba(219, 234, 254, .46) 9.4%, rgba(255, 255, 255, .28) 10.8%, rgba(255, 255, 255, 0) 13.5%),
+    radial-gradient(circle at 62% 22%, rgba(255, 255, 255, 0) 0 7.5%, rgba(255, 255, 255, .44) 9%, rgba(147, 197, 253, .24) 10.5%, rgba(255, 255, 255, 0) 13%),
+    radial-gradient(circle at 84% 62%, rgba(255, 255, 255, 0) 0 9%, rgba(191, 219, 254, .42) 10.8%, rgba(255, 255, 255, .24) 12%, rgba(255, 255, 255, 0) 15%);
+  filter: blur(6px);
+  opacity: .68;
+  pointer-events: none;
+  transform: translate3d(-50%, 0, 0);
+  animation: home-light-drift 26s ease-in-out infinite alternate;
+}
 .home-hero {
   text-align: center;
   padding: 56px 24px 52px;
@@ -733,14 +772,55 @@ input:focus, select:focus {
   gap: 16px;
 }
 .feature-card {
-  border-radius: var(--radius-lg);
+  position: relative;
+  overflow: hidden;
+  border-radius: 14px;
   padding: 28px 24px;
   display: grid;
   gap: 10px;
+  border: 3px solid rgba(255, 255, 255, .9);
+  box-shadow: 0 18px 54px rgba(37, 99, 235, .12);
+  backdrop-filter: blur(18px) saturate(145%);
+  outline: 1px solid rgba(255, 255, 255, .58);
+  outline-offset: -7px;
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
 }
-.feature-card.mint   { background: #d1fae5; }
-.feature-card.purple { background: #ede9fe; }
-.feature-card.pink   { background: #fce7f3; }
+.feature-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, .72), rgba(255, 255, 255, .16) 52%, rgba(255, 255, 255, .42));
+  opacity: .84;
+  pointer-events: none;
+  transition: opacity .18s ease;
+}
+.feature-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 255, 255, .98);
+  box-shadow: 0 24px 64px rgba(37, 99, 235, .16);
+}
+.feature-card:hover::before {
+  opacity: 1;
+}
+.feature-card > * {
+  position: relative;
+  z-index: 1;
+}
+.feature-card.mint {
+  background:
+    linear-gradient(145deg, rgba(209, 250, 229, .86), rgba(209, 250, 229, .44)),
+    rgba(255, 255, 255, .36);
+}
+.feature-card.purple {
+  background:
+    linear-gradient(145deg, rgba(237, 233, 254, .88), rgba(237, 233, 254, .46)),
+    rgba(255, 255, 255, .36);
+}
+.feature-card.pink {
+  background:
+    linear-gradient(145deg, rgba(252, 231, 243, .9), rgba(252, 231, 243, .46)),
+    rgba(255, 255, 255, .36);
+}
 .feature-icon { font-size: 26px; }
 .feature-card h3 { font-size: 15px; font-weight: 700; }
 .feature-card p  { font-size: 13px; color: var(--slate-600); line-height: 1.65; }
@@ -913,6 +993,15 @@ input:focus, select:focus {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .home-card::after {
+    animation: none;
+  }
+
+  .fortune-wrap::after {
+    animation: none;
+    opacity: 0;
+  }
+
   .feedback-detail-card > .header-row,
   .feedback-detail-card > .panel,
   .feedback-detail-card .qa-item {
@@ -964,15 +1053,44 @@ input:focus, select:focus {
 }
 
 .fortune-wrap {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, .78), rgba(239, 246, 255, .42)),
+    rgba(255, 255, 255, .44);
+  border: 3px solid rgba(255, 255, 255, .92);
+  border-radius: 16px;
   padding: 32px 28px;
-  box-shadow: var(--shadow-card);
+  box-shadow: 0 24px 70px rgba(37, 99, 235, .12);
+  backdrop-filter: blur(22px) saturate(150%);
+  outline: 1px solid rgba(255, 255, 255, .62);
+  outline-offset: -7px;
   display: grid;
   gap: 14px;
   width: 100%;
   text-align: center;
+}
+.fortune-wrap::after {
+  content: "";
+  position: absolute;
+  inset: -52% -20%;
+  background: linear-gradient(
+    125deg,
+    rgba(255, 255, 255, 0) 36%,
+    rgba(255, 255, 255, .18) 44%,
+    rgba(255, 255, 255, .78) 49%,
+    rgba(255, 255, 255, .22) 54%,
+    rgba(255, 255, 255, 0) 64%
+  );
+  mix-blend-mode: screen;
+  opacity: .68;
+  pointer-events: none;
+  transform: translate3d(-76%, -50%, 0);
+  animation: fortune-glass-shine 5.6s ease-in-out infinite;
+}
+.fortune-wrap > * {
+  position: relative;
+  z-index: 1;
 }
 
 .fortune-title {
@@ -1110,6 +1228,27 @@ input:focus, select:focus {
    Keyframes
 ═══════════════════════════════════════════════════ */
 @keyframes spin { to { transform: rotate(360deg); } }
+
+@keyframes home-light-drift {
+  0% {
+    transform: translate3d(calc(-50% - 38px), 18px, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(calc(-50% + 28px), -22px, 0) scale(1.035);
+  }
+  100% {
+    transform: translate3d(calc(-50% + 52px), 20px, 0) scale(1.015);
+  }
+}
+
+@keyframes fortune-glass-shine {
+  0%, 42% {
+    transform: translate3d(-76%, -50%, 0);
+  }
+  72%, 100% {
+    transform: translate3d(76%, 50%, 0);
+  }
+}
 
 /* ═══════════════════════════════════════════════════
    Responsive
@@ -1375,7 +1514,7 @@ input:focus, select:focus {
   width: min(1080px, 92vw);
   height: min(720px, 72vh);
   border-radius: 999px;
-  background: radial-gradient(ellipse, rgba(250, 204, 21, .42), rgba(250, 204, 21, 0) 72%);
+  background: radial-gradient(ellipse, rgba(250, 204, 21, .32), rgba(250, 204, 21, 0) 72%);
   filter: blur(58px);
   transform: translate(-50%, -50%);
   pointer-events: none;
