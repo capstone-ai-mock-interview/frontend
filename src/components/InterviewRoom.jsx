@@ -225,11 +225,19 @@ export default function InterviewRoom({
         await setLocalMicPublish(!isGroup);
         setIsConnected(true);
       } catch (error) {
+        // "Client initiated disconnect"는 cleanup에서 room.disconnect()가 호출된 것이므로 무시
+        if (error?.message?.includes("Client initiated disconnect")) return;
         setConnectionError(error.message || "LiveKit 연결에 실패했습니다.");
       }
     }
 
-    room.on(RoomEvent.Disconnected, () => setIsConnected(false));
+    const intentionalDisconnect = { current: false };
+
+    room.on(RoomEvent.Disconnected, () => {
+      if (!intentionalDisconnect.current) {
+        setIsConnected(false);
+      }
+    });
     room.on(RoomEvent.TrackSubscribed, (track, publication, participant) => {
       if (track.kind === "audio") {
         const audioEl = track.attach();
@@ -261,6 +269,7 @@ export default function InterviewRoom({
     connectRoom().then(checkExistingParticipants);
 
     return () => {
+      intentionalDisconnect.current = true;
       room.off(RoomEvent.DataReceived, handleDataReceived);
       room.remoteParticipants.forEach((p) => {
         p.audioTrackPublications.forEach((pub) => {
