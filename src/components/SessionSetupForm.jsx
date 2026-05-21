@@ -32,6 +32,13 @@ const STEPS = [
   { id: 4, label: "마이크 체크" },
 ];
 
+const MIC_TEST = {
+  CALIBRATION_MS: 800,
+  REQUIRED_SPEECH_MS: 700,
+  MIN_THRESHOLD: 0.018,
+  NOISE_MULTIPLIER: 2.6,
+};
+
 const STEP_COPY = [
   {
     title: "어떤 방식으로 연습할까요?",
@@ -46,7 +53,7 @@ const STEP_COPY = [
   {
     title: "연습 시간을 정해주세요",
     description:
-      "전체 면접 시간 안에서 질문별 답변 시간은 최대 1분 30초로 제한됩니다.",
+      "전체 면접시간과 질문별 답변시간을 설정합니다.",
   },
   {
     title: "마이크를 확인하고 시작하세요",
@@ -73,6 +80,8 @@ export default function SessionSetupForm({ onSubmit, isSubmitting }) {
   const [audioLevel, setAudioLevel] = useState(0);
   const [audioDetected, setAudioDetected] = useState(false);
   const [micPassed, setMicPassed] = useState(false);
+  const [micTestPhase, setMicTestPhase] = useState("idle");
+  const [micProgress, setMicProgress] = useState(0);
   const [agreeRule, setAgreeRule] = useState(false);
 
   const streamRef = useRef(null);
@@ -105,13 +114,34 @@ export default function SessionSetupForm({ onSubmit, isSubmitting }) {
   }, []);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => () => stopMicTest(false), []);
+  useEffect(() => () => {
+    cleanupMicResources();
+  }, []);
+
+  const cleanupMicResources = async () => {
+    if (animationRef.current) {
+      window.cancelAnimationFrame(animationRef.current);
+      animationRef.current = null;
+    }
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((t) => t.stop());
+      streamRef.current = null;
+    }
+    if (contextRef.current) {
+      await contextRef.current.close();
+      contextRef.current = null;
+    }
+  };
 
   const startMicTest = async () => {
     try {
+      await cleanupMicResources();
       setAudioPermission("requesting");
+      setMicTestPhase("requesting");
       setMicPassed(false);
       setAudioDetected(false);
+      setMicProgress(0);
+      setAudioLevel(0);
       maxLevelRef.current = 0;
       smoothedLevelRef.current = 0;
       noiseFloorRef.current = 0;
@@ -131,6 +161,7 @@ export default function SessionSetupForm({ onSubmit, isSubmitting }) {
       lastAudioTickRef.current = testStartedAtRef.current;
       setAudioPermission("granted");
       setIsTestingMic(true);
+      setMicTestPhase("calibrating");
 
       const loop = () => {
         const now = performance.now();
@@ -144,16 +175,21 @@ export default function SessionSetupForm({ onSubmit, isSubmitting }) {
           sum += n * n;
         }
         const rms = Math.sqrt(sum / data.length);
-        const isCalibrating = elapsed < 650;
+        const isCalibrating = elapsed < MIC_TEST.CALIBRATION_MS;
         if (isCalibrating) {
           noiseFloorRef.current =
             noiseFloorRef.current === 0
               ? rms
               : noiseFloorRef.current * 0.85 + rms * 0.15;
+          setMicTestPhase("calibrating");
+          setMicProgress(0);
         }
 
         const noiseFloor = Math.max(noiseFloorRef.current, 0.006);
-        const threshold = Math.max(noiseFloor * 2.8, 0.018);
+        const threshold = Math.max(
+          noiseFloor * MIC_TEST.NOISE_MULTIPLIER,
+          MIC_TEST.MIN_THRESHOLD
+        );
         const signal = Math.max(0, Math.min(1, (rms - threshold) / 0.12));
         const prev = smoothedLevelRef.current;
         const next =
@@ -163,15 +199,27 @@ export default function SessionSetupForm({ onSubmit, isSubmitting }) {
         maxLevelRef.current = Math.max(maxLevelRef.current, normalized);
         setAudioLevel(normalized);
 
+        if (!isCalibrating) {
+          setMicTestPhase("listening");
+        }
+
         if (!isCalibrating && rms > threshold) {
           speechMsRef.current += delta;
         } else {
-          speechMsRef.current = Math.max(0, speechMsRef.current - delta * 1.5);
+          speechMsRef.current = Math.max(0, speechMsRef.current - delta * 0.7);
         }
+        setMicProgress(
+          Math.min(100, (speechMsRef.current / MIC_TEST.REQUIRED_SPEECH_MS) * 100)
+        );
 
-        if (speechMsRef.current >= 450) {
+        if (speechMsRef.current >= MIC_TEST.REQUIRED_SPEECH_MS) {
           setAudioDetected(true);
           setMicPassed(true);
+          setMicTestPhase("passed");
+          setMicProgress(100);
+          cleanupMicResources();
+          setIsTestingMic(false);
+          return;
         }
 
         animationRef.current = window.requestAnimationFrame(loop);
@@ -179,28 +227,21 @@ export default function SessionSetupForm({ onSubmit, isSubmitting }) {
       animationRef.current = window.requestAnimationFrame(loop);
     } catch {
       setAudioPermission("denied");
+      setMicTestPhase("denied");
       stopMicTest(false);
     }
   };
 
   const stopMicTest = async (validate = true) => {
-    if (animationRef.current) {
-      window.cancelAnimationFrame(animationRef.current);
-      animationRef.current = null;
-    }
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((t) => t.stop());
-      streamRef.current = null;
-    }
-    if (contextRef.current) {
-      await contextRef.current.close();
-      contextRef.current = null;
-    }
+    await cleanupMicResources();
     setIsTestingMic(false);
     smoothedLevelRef.current = 0;
     setAudioLevel(0);
     if (!validate) return;
-    setMicPassed(speechMsRef.current >= 450 || maxLevelRef.current > 0.4);
+    const passed =
+      speechMsRef.current >= MIC_TEST.REQUIRED_SPEECH_MS || maxLevelRef.current > 0.6;
+    setMicPassed(passed);
+    setMicTestPhase(passed ? "passed" : "failed");
   };
 
   const goNext = () => setStep((s) => Math.min(STEPS.length, s + 1));
@@ -211,7 +252,7 @@ export default function SessionSetupForm({ onSubmit, isSubmitting }) {
   const canProceedStep2 = resumes.length === 0 || Boolean(selectedResumeId);
   const isFirst = step === 1;
   const isLast = step === STEPS.length;
-  const canSubmit = agreeRule && !isSubmitting && canProceedStep2;
+  const canSubmit = agreeRule && micPassed && !isSubmitting && canProceedStep2;
   const canGoNext = step === 1 || (step === 2 && canProceedStep2) || step === 3;
 
   const micStatusText = {
@@ -221,31 +262,41 @@ export default function SessionSetupForm({ onSubmit, isSubmitting }) {
     denied: "권한 거부 또는 장치 오류",
   }[audioPermission];
 
+  const micPhaseText = {
+    idle: "테스트 시작을 누른 뒤 먼저 조용히 1초 정도 기다려 주세요.",
+    requesting: "브라우저 마이크 권한을 요청하고 있습니다.",
+    calibrating: "주변 소음을 측정 중입니다. 잠시 조용히 있어 주세요.",
+    listening: "이제 평소 답변하듯 1초 정도 말해 주세요.",
+    passed: "마이크 테스트를 통과했습니다.",
+    failed: "음성이 충분히 감지되지 않았습니다. 다시 테스트해 주세요.",
+    denied: "마이크 권한이 거부되었습니다. 브라우저 권한을 확인해 주세요.",
+  }[micTestPhase];
+
   const summaryItems = useMemo(
     () => [
       {
         key: "mode",
         status: step > 1 ? "done" : step === 1 ? "active" : "pending",
         label: "유형",
-        value: step > 1 ? (isGroup ? `그룹 면접 (${maxParticipants}명)` : "일반 면접") : "",
+        value: step >= 1 ? (isGroup ? `그룹 면접 (${maxParticipants}명)` : "일반 면접") : "",
       },
       {
         key: "job",
         status: step > 2 ? "done" : step === 2 ? "active" : "pending",
         label: "직무",
-        value: step > 2 ? selectedJob?.label ?? jobField : "",
+        value: step >= 2 ? selectedJob?.label ?? jobField : "",
       },
       {
         key: "resume",
         status: step > 2 ? "done" : step === 2 ? "active" : "pending",
         label: "이력서",
-        value: step > 2 ? selectedResume ? selectedResume.title : "미선택" : "",
+        value: step >= 2 ? selectedResume ? selectedResume.title : "미선택" : "",
       },
       {
         key: "time",
         status: step > 3 ? "done" : step === 3 ? "active" : "pending",
         label: "시간",
-        value: step > 3 ? `${durationMinutes}분` : "",
+        value: step >= 3 ? `${durationMinutes}분` : "",
       },
     ],
     [durationMinutes, isGroup, jobField, maxParticipants, selectedJob, selectedResume, step]
@@ -254,10 +305,10 @@ export default function SessionSetupForm({ onSubmit, isSubmitting }) {
   const panelMotion = reduceMotion
     ? {}
     : {
-        initial: { opacity: 0, y: 10 },
-        animate: { opacity: 1, y: 0 },
-        exit: { opacity: 0, y: -8 },
-        transition: { duration: 0.22, ease: "easeOut" },
+        initial: { opacity: 0, y: 18, scale: 0.985 },
+        animate: { opacity: 1, y: 0, scale: 1 },
+        exit: { opacity: 0, y: -10, scale: 0.995 },
+        transition: { duration: 0.32, ease: [0.22, 1, 0.36, 1] },
       };
 
   const handleSubmit = () => {
@@ -291,7 +342,7 @@ export default function SessionSetupForm({ onSubmit, isSubmitting }) {
   );
 
   const Step1 = (
-    <motion.div className="setup-step-body" {...panelMotion}>
+    <motion.div key="setup-step-mode" className="setup-step-body" {...panelMotion}>
       <div className="setup-choice-grid">
         {renderModeCard({
           value: "SOLO",
@@ -339,7 +390,7 @@ export default function SessionSetupForm({ onSubmit, isSubmitting }) {
   );
 
   const Step2 = (
-    <motion.div className="setup-step-body" {...panelMotion}>
+    <motion.div key="setup-step-profile" className="setup-step-body" {...panelMotion}>
       <div className="setup-soft-panel">
         {resumeLoading ? (
           <p className="subtext">이력서 목록을 불러오는 중...</p>
@@ -391,7 +442,7 @@ export default function SessionSetupForm({ onSubmit, isSubmitting }) {
   );
 
   const Step3 = (
-    <motion.div className="setup-step-body" {...panelMotion}>
+    <motion.div key="setup-step-duration" className="setup-step-body" {...panelMotion}>
       <label className="field">
         <span>면접 시간</span>
         <div className="setup-time-grid">
@@ -409,15 +460,18 @@ export default function SessionSetupForm({ onSubmit, isSubmitting }) {
         </div>
       </label>
 
-      <div className="setup-info-line">
-        <Clock3 size={16} />
-        질문마다 답변 시간 1분 30초를 기준으로 실제 면접처럼 연습할 수 있어요.
+      <div className="setup-answer-limit">
+        <span>질문별 답변 시간</span>
+        <strong>
+          <Clock3 size={18} />
+          1:30
+        </strong>
       </div>
     </motion.div>
   );
 
   const Step4 = (
-    <motion.div className="setup-step-body" {...panelMotion}>
+    <motion.div key="setup-step-mic" className="setup-step-body" {...panelMotion}>
       <div className="setup-mic-panel">
         <div className="setup-mic-orb-wrap">
           {isTestingMic && <span className="setup-mic-pulse" />}
@@ -429,18 +483,26 @@ export default function SessionSetupForm({ onSubmit, isSubmitting }) {
         <div className="setup-mic-content">
           <div className="setup-mic-header">
             <strong>{micPassed ? "마이크 감지 완료" : micStatusText}</strong>
-            {audioPermission === "granted" && (
+            {(audioPermission === "granted" || micPassed) && (
               <span className={audioDetected ? "text-success" : "text-warn"}>
                 {audioDetected ? "음성 감지됨" : "대기 중"}
               </span>
             )}
           </div>
+          <p className="setup-mic-guide">{micPhaseText}</p>
 
           <div className="audio-meter setup-audio-meter">
             <div
               className="audio-meter-fill"
               style={{ width: `${Math.min(100, audioLevel * 100)}%` }}
             />
+          </div>
+          <div className="setup-mic-progress">
+            <span>통과 기준</span>
+            <strong>{Math.round(micProgress)}%</strong>
+            <div>
+              <i style={{ width: `${micProgress}%` }} />
+            </div>
           </div>
 
           <div className="audio-test-row">
@@ -450,7 +512,7 @@ export default function SessionSetupForm({ onSubmit, isSubmitting }) {
               onClick={startMicTest}
               disabled={isTestingMic}
             >
-              테스트 시작
+              {micPassed || micTestPhase === "failed" ? "다시 테스트" : "테스트 시작"}
             </button>
             <button
               className="ghost-btn"
@@ -481,7 +543,7 @@ export default function SessionSetupForm({ onSubmit, isSubmitting }) {
 
       {!micPassed && (
         <div className="notice warn">
-          마이크 테스트가 완료되지 않았습니다. 음성이 인식되지 않을 수 있습니다.
+          마이크 테스트 통과 후 면접을 시작할 수 있습니다. 조용한 상태에서 시작한 뒤 짧게 말해 주세요.
         </div>
       )}
     </motion.div>
@@ -553,13 +615,40 @@ export default function SessionSetupForm({ onSubmit, isSubmitting }) {
 
           <div className="setup-summary-list">
             {summaryItems.map((item) => (
-              <div
+              <motion.div
+                layout
+                transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
                 className={`setup-summary-item is-${item.status}`}
                 key={item.key}
               >
                 <span>{item.label}</span>
-                {item.value && <strong>{item.value}</strong>}
-              </div>
+                <AnimatePresence>
+                  {item.status === "done" && (
+                    <motion.span
+                      className="setup-summary-check"
+                      initial={reduceMotion ? false : { opacity: 0, scale: 0.6 }}
+                      animate={reduceMotion ? false : { opacity: 1, scale: 1 }}
+                      exit={reduceMotion ? undefined : { opacity: 0, scale: 0.6 }}
+                      transition={{ duration: 0.2, ease: "easeOut" }}
+                    >
+                      <Check className="setup-summary-check-icon" size={24} strokeWidth={3.5} />
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+                <AnimatePresence mode="wait">
+                  {item.value && (
+                    <motion.strong
+                      key={item.value}
+                      initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+                      animate={reduceMotion ? false : { opacity: 1, y: 0 }}
+                      exit={reduceMotion ? undefined : { opacity: 0, y: -4 }}
+                      transition={{ duration: 0.22, ease: "easeOut" }}
+                    >
+                      {item.value}
+                    </motion.strong>
+                  )}
+                </AnimatePresence>
+              </motion.div>
             ))}
           </div>
         </motion.aside>
