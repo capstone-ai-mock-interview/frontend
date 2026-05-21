@@ -690,6 +690,8 @@ input:focus, select:focus {
    Home
 ═══════════════════════════════════════════════════ */
 .home-card {
+  position: relative;
+  isolation: isolate;
   display: grid;
   gap: 0;
   width: 100%;
@@ -697,6 +699,23 @@ input:focus, select:focus {
   border: none;
   padding: 0;
   box-shadow: none;
+}
+.home-card::before {
+  content: "";
+  position: absolute;
+  inset: 122px -28px 220px;
+  z-index: -1;
+  background: repeating-linear-gradient(
+    135deg,
+    rgba(37, 99, 235, .055) 0,
+    rgba(37, 99, 235, .055) 1px,
+    transparent 1px,
+    transparent 18px
+  );
+  mask-image: linear-gradient(90deg, transparent, #000 16%, #000 84%, transparent);
+  opacity: .72;
+  pointer-events: none;
+  animation: home-pattern-drift 18s linear infinite;
 }
 
 .home-hero {
@@ -744,13 +763,24 @@ input:focus, select:focus {
   backdrop-filter: blur(18px) saturate(145%);
   outline: 1px solid rgba(255, 255, 255, .58);
   outline-offset: -7px;
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
 }
 .feature-card::before {
   content: "";
   position: absolute;
   inset: 0;
   background: linear-gradient(135deg, rgba(255, 255, 255, .72), rgba(255, 255, 255, .16) 52%, rgba(255, 255, 255, .42));
+  opacity: .84;
   pointer-events: none;
+  transition: opacity .18s ease;
+}
+.feature-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 255, 255, .98);
+  box-shadow: 0 24px 64px rgba(37, 99, 235, .16);
+}
+.feature-card:hover::before {
+  opacity: 1;
 }
 .feature-card > * {
   position: relative;
@@ -943,6 +973,10 @@ input:focus, select:focus {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .home-card::before {
+    animation: none;
+  }
+
   .fortune-wrap::after {
     animation: none;
     opacity: 0;
@@ -993,7 +1027,7 @@ input:focus, select:focus {
    Fortune Cookie
 ═══════════════════════════════════════════════════ */
 .fortune-section {
-  margin-top: 0;
+  margin-top: 40px;
   display: flex;
   justify-content: center;
 }
@@ -1174,6 +1208,15 @@ input:focus, select:focus {
    Keyframes
 ═══════════════════════════════════════════════════ */
 @keyframes spin { to { transform: rotate(360deg); } }
+
+@keyframes home-pattern-drift {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 36px 36px;
+  }
+}
 
 @keyframes fortune-glass-shine {
   0%, 42% {
